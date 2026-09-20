@@ -17,10 +17,10 @@
         "announcement-bar-0": {
           "type": "announcement",
           "settings": {
-            "text": "⚡ CRISPY DROPS INCOMING • FREE SECRET SAUCE ON ORDERS OVER $30 ⚡",
+            "text": "✨ FREE US SHIPPING ON ORDERS OVER $75 • INSTANT DOWNLOADS FOR SOFTWARE & MUSIC ✨",
             "text_alignment": "center",
             "color_scheme": "scheme-5",
-            "link": ""
+            "link": "/collections/all"
           }
         }
       },

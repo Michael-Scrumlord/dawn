@@ -1,7 +1,7 @@
 {%- style -%}
   .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
-    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+    padding-top: {{ section.settings.padding_top | times: 0.8 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.8 | round: 0 }}px;
   }
 
   @media screen and (min-width: 750px) {
@@ -9,6 +9,15 @@
       padding-top: {{ section.settings.padding_top }}px;
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
+  }
+
+  .nug-hero-section {
+    position: relative;
+    background: radial-gradient(circle at 82% 25%, rgba(247, 213, 112, 0.45) 0%, rgba(228, 161, 58, 0.12) 40%, transparent 65%),
+                radial-gradient(circle at 10% 80%, rgba(247, 213, 112, 0.3) 0%, transparent 45%),
+                #FFFDF7;
+    border-bottom: 1px solid rgba(228, 161, 58, 0.15);
+    overflow: hidden;
   }
 
   .nug-hero-grid {
@@ -29,23 +38,25 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 1.2rem;
+    padding: 0.5rem 1.3rem;
     border-radius: 9999px;
-    background: #F7D570;
+    background: rgba(247, 213, 112, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(228, 161, 58, 0.4);
     color: #3E2614;
     font-weight: 800;
-    font-size: 0.85rem;
-    letter-spacing: 0.08em;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-bottom: 1.5rem;
-    box-shadow: 0 2px 10px rgba(247, 213, 112, 0.4);
+    box-shadow: 0 4px 14px rgba(247, 213, 112, 0.4);
   }
 
   .nug-hero-title {
-    font-size: clamp(2.5rem, 5vw + 1rem, 4.2rem);
+    font-size: clamp(2.6rem, 5.2vw + 0.5rem, 4.4rem);
     font-weight: 900;
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.035em;
     color: #3E2614;
     margin-bottom: 1.5rem;
   }
@@ -59,21 +70,21 @@
   .nug-hero-title span.highlight::after {
     content: '';
     position: absolute;
-    bottom: 4px;
+    bottom: 6px;
     left: 0;
     width: 100%;
-    height: 8px;
+    height: 10px;
     background: rgba(247, 213, 112, 0.45);
     border-radius: 4px;
     z-index: -1;
   }
 
   .nug-hero-subtitle {
-    font-size: 1.15rem;
-    line-height: 1.6;
+    font-size: 1.18rem;
+    line-height: 1.65;
     color: #5C4028;
     margin-bottom: 2.2rem;
-    max-width: 520px;
+    max-width: 540px;
   }
 
   .nug-hero-actions {
@@ -84,21 +95,41 @@
     margin-bottom: 2.5rem;
   }
 
+  .nug-hero-actions .button--secondary {
+    background: #FFFFFF;
+    border: 2px solid #E4A13A;
+    color: #3E2614;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(62, 38, 20, 0.05);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .nug-hero-actions .button--secondary:hover {
+    background: #FFF6DE;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 18px rgba(228, 161, 58, 0.25);
+  }
+
   .nug-hero-trust {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
+    gap: 0.85rem;
     padding-top: 1.5rem;
     border-top: 1px solid rgba(62, 38, 20, 0.12);
   }
 
   .nug-trust-item {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: 600;
+    padding: 0.45rem 1rem;
+    background: #FFFFFF;
+    border: 1px solid rgba(228, 161, 58, 0.25);
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 700;
     color: #3E2614;
+    box-shadow: 0 2px 8px rgba(62, 38, 20, 0.04);
   }
 
   /* Mascot Visual Showcase */
@@ -111,22 +142,22 @@
 
   .nug-mascot-backdrop {
     position: absolute;
-    width: 320px;
-    height: 320px;
+    width: 360px;
+    height: 360px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(247, 213, 112, 0.6) 0%, rgba(228, 161, 58, 0.15) 70%, transparent 100%);
-    filter: blur(20px);
+    background: radial-gradient(circle, rgba(247, 213, 112, 0.7) 0%, rgba(228, 161, 58, 0.2) 65%, transparent 100%);
+    filter: blur(25px);
     z-index: 1;
   }
 
   .nug-mascot-card {
     position: relative;
     z-index: 2;
-    background: #FFFDF7;
-    border: 3px solid #FFF6DE;
-    border-radius: 36px;
-    padding: 2.5rem 2rem;
-    box-shadow: 0 20px 40px rgba(62, 38, 20, 0.12);
+    background: linear-gradient(150deg, #FFFFFF 0%, #FFF8EA 100%);
+    border: 2.5px solid rgba(228, 161, 58, 0.35);
+    border-radius: 40px;
+    padding: 2.5rem 2rem 2rem;
+    box-shadow: 0 24px 60px -10px rgba(62, 38, 20, 0.16), 0 0 40px rgba(247, 213, 112, 0.3);
     text-align: center;
     width: 100%;
     max-width: 380px;
@@ -136,20 +167,20 @@
     width: 220px;
     height: 220px;
     object-fit: contain;
-    filter: drop-shadow(0 12px 18px rgba(62, 38, 20, 0.2));
+    filter: drop-shadow(0 14px 22px rgba(62, 38, 20, 0.22));
     animation: nug-float 3.5s ease-in-out infinite;
   }
 
   .nug-pill-tag {
     position: absolute;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.1rem;
     background: #FFFFFF;
     border: 2px solid #E4A13A;
     border-radius: 9999px;
     font-weight: 800;
     font-size: 0.8rem;
     color: #3E2614;
-    box-shadow: 0 8px 16px rgba(62, 38, 20, 0.1);
+    box-shadow: 0 8px 18px rgba(62, 38, 20, 0.12);
     z-index: 3;
     white-space: nowrap;
   }
@@ -167,7 +198,7 @@
   }
 {%- endstyle -%}
 
-<div class="color-{{ section.settings.color_scheme }} gradient">
+<div class="nug-hero-section color-{{ section.settings.color_scheme }} gradient">
   <div class="page-width section-{{ section.id }}-padding">
     <div class="nug-hero-grid">
       <!-- Content Column -->

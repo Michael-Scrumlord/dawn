@@ -1,0 +1,132 @@
+{%- style -%}
+  .nug-cat-bar-wrapper {
+    padding: 1.5rem 0 2.5rem;
+  }
+
+  .nug-cat-bar-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #8A6548;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nug-cat-chips-scroll {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nug-cat-chips-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nug-cat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 1.3rem;
+    border-radius: 9999px;
+    background: #FFFFFF;
+    border: 1.5px solid rgba(228, 161, 58, 0.3);
+    color: #3E2614;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(62, 38, 20, 0.05);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .nug-cat-chip:hover {
+    background: #FFF6DE;
+    border-color: #E4A13A;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(228, 161, 58, 0.25);
+    color: #3E2614;
+  }
+
+  .nug-cat-chip--active {
+    background: #E4A13A;
+    border-color: #E4A13A;
+    color: #FFFFFF;
+    box-shadow: 0 4px 14px rgba(228, 161, 58, 0.35);
+  }
+
+  .nug-cat-chip--active:hover {
+    background: #D49028;
+    color: #FFFFFF;
+  }
+{%- endstyle -%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient">
+  <div class="page-width nug-cat-bar-wrapper">
+    <div class="nug-cat-bar-title">
+      <span>{{ section.settings.subheading | default: 'EXPLORE BY MEDIUM & DISCIPLINE' }}</span>
+    </div>
+    <div class="nug-cat-chips-scroll">
+      <a href="/collections/all" class="nug-cat-chip nug-cat-chip--active">
+        <span>✨</span>
+        <span>All Studio Works</span>
+      </a>
+      <a href="/collections/all" class="nug-cat-chip">
+        <span>💻</span>
+        <span>Software & Subscriptions</span>
+      </a>
+      <a href="/collections/all" class="nug-cat-chip">
+        <span>🎵</span>
+        <span>Digital Music & Audio</span>
+      </a>
+      <a href="/collections/all" class="nug-cat-chip">
+        <span>📖</span>
+        <span>Hand-Bound Books</span>
+      </a>
+      <a href="/collections/all" class="nug-cat-chip">
+        <span>👜</span>
+        <span>Canvas Bags & Sewing</span>
+      </a>
+      <a href="/collections/all" class="nug-cat-chip">
+        <span>🪵</span>
+        <span>Woodburning Art</span>
+      </a>
+      <a href="/collections/all" class="nug-cat-chip">
+        <span>🪡</span>
+        <span>Artisan Lace</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Category Filter Bar",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Section Eyebrow",
+      "default": "EXPLORE BY MEDIUM & DISCIPLINE"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category Filter Bar"
+    }
+  ]
+}
+{% endschema %}

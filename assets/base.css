@@ -3727,4 +3727,121 @@ details-disclosure > details {
   margin-left: 2px;
 }
 
+/* ==========================================================================
+   Artisan Product Card Visual Placeholders & Polish
+   ========================================================================== */
+
+.card {
+  border-radius: 20px !important;
+  overflow: hidden;
+  border: 1.5px solid rgba(228, 161, 58, 0.2) !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 4px 20px rgba(62, 38, 20, 0.05);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.card-wrapper:hover .card {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 16px 36px rgba(62, 38, 20, 0.12), 0 0 0 1px rgba(228, 161, 58, 0.35) !important;
+}
+
+.nug-card-placeholder {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 220px;
+  background: radial-gradient(circle at 50% 35%, #FFFDF5 0%, #FFF3D6 100%) !important;
+  border-bottom: 2px solid rgba(228, 161, 58, 0.2);
+  transition: background 0.3s ease;
+  position: relative;
+}
+
+.card-wrapper:hover .nug-card-placeholder {
+  background: radial-gradient(circle at 50% 35%, #FFFFFF 0%, #FFEAB8 100%) !important;
+}
+
+.nug-placeholder-art {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+
+.nug-placeholder-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 6px 12px rgba(62, 38, 20, 0.15));
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card-wrapper:hover .nug-placeholder-icon {
+  transform: scale(1.18) rotate(4deg);
+}
+
+.nug-placeholder-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3E2614;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(228, 161, 58, 0.35);
+  box-shadow: 0 2px 8px rgba(62, 38, 20, 0.08);
+  white-space: nowrap;
+}
+
+.nug-placeholder-mascot {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(62, 38, 20, 0.16));
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card-wrapper:hover .nug-placeholder-mascot {
+  transform: scale(1.15) rotate(-6deg);
+}
+
+/* Card Content & Headings */
+.card__heading {
+  font-weight: 800;
+  font-size: 1.15rem;
+  line-height: 1.35;
+  color: #3E2614;
+}
+
+.card-information .price {
+  font-weight: 700;
+  color: #3E2614;
+}
+
+/* Quick Add Button Polish */
+.quick-add__submit {
+  border-radius: 9999px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  box-shadow: 0 2px 8px rgba(62, 38, 20, 0.06);
+  transition: all 0.2s ease !important;
+}
+
+.quick-add__submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(228, 161, 58, 0.3);
+}
+
+/* Announcement Bar Polish */
+.announcement-bar__message {
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+  color: #2A180B !important;
+}
+
+
 

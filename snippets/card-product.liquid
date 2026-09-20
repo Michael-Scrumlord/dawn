@@ -107,6 +107,35 @@
                 {%- endif -%}
               </div>
             </div>
+          {%- else -%}
+            <div class="card__media">
+              <div class="media media--transparent nug-card-placeholder">
+                <div class="nug-placeholder-art">
+                  {%- if card_product.type contains 'Software' -%}
+                    <div class="nug-placeholder-icon">💻</div>
+                    <div class="nug-placeholder-badge">DIGITAL SUITE</div>
+                  {%- elsif card_product.type contains 'Music' -%}
+                    <div class="nug-placeholder-icon">🎵</div>
+                    <div class="nug-placeholder-badge">ORIGINAL SOUNDTRACK</div>
+                  {%- elsif card_product.type contains 'Bookbinding' -%}
+                    <div class="nug-placeholder-icon">📖</div>
+                    <div class="nug-placeholder-badge">HAND-BOUND</div>
+                  {%- elsif card_product.type contains 'Bags' or card_product.type contains 'Sewing' -%}
+                    <div class="nug-placeholder-icon">👜</div>
+                    <div class="nug-placeholder-badge">MAKER SEWN</div>
+                  {%- elsif card_product.type contains 'Woodburning' -%}
+                    <div class="nug-placeholder-icon">🪵</div>
+                    <div class="nug-placeholder-badge">PYROGRAPHY ART</div>
+                  {%- elsif card_product.type contains 'Lace' -%}
+                    <div class="nug-placeholder-icon">🪡</div>
+                    <div class="nug-placeholder-badge">ARTISAN LACE</div>
+                  {%- else -%}
+                    <img src="{{ 'nug-mascot.png' | asset_url }}" alt="NugMe Studio" width="80" height="80" class="nug-placeholder-mascot">
+                    <div class="nug-placeholder-badge">STUDIO CRAFT</div>
+                  {%- endif -%}
+                </div>
+              </div>
+            </div>
           {%- endif -%}
           <div class="card__content">
             <div class="card__information">
