@@ -205,7 +205,10 @@
             }}
           </div>
         {%- else -%}
-          <span class="h2">{{ shop.name }}</span>
+          <div class="header__heading-logo-wrapper nug-logo-lockup">
+            <img src="{{ 'nug-mascot.png' | asset_url }}" alt="NugMe Mascot" width="46" height="46" class="nug-header-mascot motion-reduce">
+            <span class="h2 nug-brand-title">NugMe<span class="nug-title-accent">.org</span></span>
+          </div>
         {%- endif -%}
       </a>
       {%- if request.page_type == 'index' -%}
@@ -248,7 +251,10 @@
             }}
           </div>
         {%- else -%}
-          <span class="h2">{{ shop.name }}</span>
+          <div class="header__heading-logo-wrapper nug-logo-lockup">
+            <img src="{{ 'nug-mascot.png' | asset_url }}" alt="NugMe Mascot" width="46" height="46" class="nug-header-mascot motion-reduce">
+            <span class="h2 nug-brand-title">NugMe<span class="nug-title-accent">.org</span></span>
+          </div>
         {%- endif -%}
       </a>
       {%- if request.page_type == 'index' -%}

@@ -5,7 +5,7 @@
     "announcement-bar": {
       "type": "announcement-bar",
       "settings": {
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-5",
         "show_line_separator": true,
         "show_social": false,
         "auto_rotate": false,
@@ -17,9 +17,9 @@
         "announcement-bar-0": {
           "type": "announcement",
           "settings": {
-            "text": "Welcome to our store",
+            "text": "⚡ CRISPY DROPS INCOMING • FREE SECRET SAUCE ON ORDERS OVER $30 ⚡",
             "text_alignment": "center",
-            "color_scheme": "scheme-1",
+            "color_scheme": "scheme-5",
             "link": ""
           }
         }

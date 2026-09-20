@@ -121,6 +121,10 @@
                               width: settings.brand_image_width
                           }}
                         </div>
+                      {%- else -%}
+                        <div class="footer-block__image-wrapper" style="max-width: 64px; margin-bottom: 1rem;">
+                          <img src="{{ 'nug-mascot.png' | asset_url }}" alt="NugMe Mascot" width="64" height="64" loading="lazy" style="width: 64px; height: auto; object-fit: contain;">
+                        </div>
                       {%- endif -%}
                       {%- if settings.brand_headline != blank -%}
                         <h2 class="footer-block__heading rte">{{ settings.brand_headline }}</h2>

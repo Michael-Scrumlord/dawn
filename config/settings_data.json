@@ -7,57 +7,57 @@
       "color_schemes": {
         "scheme-1": {
           "settings": {
-            "background": "#FFFFFF",
+            "background": "#FFFDF7",
             "background_gradient": "",
-            "text": "#121212",
-            "button": "#121212",
+            "text": "#3E2614",
+            "button": "#E4A13A",
             "button_label": "#FFFFFF",
-            "secondary_button_label": "#121212",
-            "shadow": "#121212"
+            "secondary_button_label": "#3E2614",
+            "shadow": "#3E2614"
           }
         },
         "scheme-2": {
           "settings": {
-            "background": "#F3F3F3",
+            "background": "#FFF6DE",
             "background_gradient": "",
-            "text": "#121212",
-            "button": "#121212",
-            "button_label": "#F3F3F3",
-            "secondary_button_label": "#121212",
-            "shadow": "#121212"
+            "text": "#3E2614",
+            "button": "#E4A13A",
+            "button_label": "#FFFFFF",
+            "secondary_button_label": "#3E2614",
+            "shadow": "#3E2614"
           }
         },
         "scheme-3": {
           "settings": {
-            "background": "#242833",
+            "background": "#F7D570",
             "background_gradient": "",
-            "text": "#FFFFFF",
-            "button": "#FFFFFF",
-            "button_label": "#000000",
-            "secondary_button_label": "#FFFFFF",
-            "shadow": "#121212"
+            "text": "#3E2614",
+            "button": "#3E2614",
+            "button_label": "#F7D570",
+            "secondary_button_label": "#3E2614",
+            "shadow": "#3E2614"
           }
         },
         "scheme-4": {
           "settings": {
-            "background": "#121212",
+            "background": "#2A180B",
             "background_gradient": "",
-            "text": "#FFFFFF",
-            "button": "#FFFFFF",
-            "button_label": "#121212",
-            "secondary_button_label": "#FFFFFF",
-            "shadow": "#121212"
+            "text": "#FFF8EE",
+            "button": "#E4A13A",
+            "button_label": "#2A180B",
+            "secondary_button_label": "#FFF8EE",
+            "shadow": "#1A0E06"
           }
         },
         "scheme-5": {
           "settings": {
-            "background": "#334FB4",
+            "background": "#E4A13A",
             "background_gradient": "",
-            "text": "#FFFFFF",
-            "button": "#FFFFFF",
-            "button_label": "#334FB4",
-            "secondary_button_label": "#FFFFFF",
-            "shadow": "#121212"
+            "text": "#2A180B",
+            "button": "#2A180B",
+            "button_label": "#FFFDF7",
+            "secondary_button_label": "#2A180B",
+            "shadow": "#2A180B"
           }
         }
       },
@@ -73,7 +73,7 @@
       "animations_hover_elements": "none",
       "buttons_border_thickness": 1,
       "buttons_border_opacity": 100,
-      "buttons_radius": 0,
+      "buttons_radius": 40,
       "buttons_shadow_opacity": 0,
       "buttons_shadow_horizontal_offset": 0,
       "buttons_shadow_vertical_offset": 4,
@@ -87,7 +87,7 @@
       "variant_pills_shadow_blur": 5,
       "inputs_border_thickness": 1,
       "inputs_border_opacity": 55,
-      "inputs_radius": 0,
+      "inputs_radius": 24,
       "inputs_shadow_opacity": 0,
       "inputs_shadow_horizontal_offset": 0,
       "inputs_shadow_vertical_offset": 4,
@@ -98,7 +98,7 @@
       "card_color_scheme": "scheme-2",
       "card_border_thickness": 0,
       "card_border_opacity": 10,
-      "card_corner_radius": 0,
+      "card_corner_radius": 16,
       "card_shadow_opacity": 0,
       "card_shadow_horizontal_offset": 0,
       "card_shadow_vertical_offset": 4,
@@ -109,7 +109,7 @@
       "collection_card_color_scheme": "scheme-2",
       "collection_card_border_thickness": 0,
       "collection_card_border_opacity": 10,
-      "collection_card_corner_radius": 0,
+      "collection_card_corner_radius": 16,
       "collection_card_shadow_opacity": 0,
       "collection_card_shadow_horizontal_offset": 0,
       "collection_card_shadow_vertical_offset": 4,
@@ -154,10 +154,10 @@
       "drawer_shadow_blur": 5,
       "badge_position": "bottom left",
       "badge_corner_radius": 40,
-      "sale_badge_color_scheme": "scheme-4",
-      "sold_out_badge_color_scheme": "scheme-3",
-      "brand_headline": "",
-      "brand_description": "<p></p>",
+      "sale_badge_color_scheme": "scheme-3",
+      "sold_out_badge_color_scheme": "scheme-4",
+      "brand_headline": "NugMe - Stay Crispy",
+      "brand_description": "<p>Official apparel and crunch gear for nugget lovers everywhere.</p>",
       "brand_image_width": 100,
       "social_twitter_link": "",
       "social_facebook_link": "",

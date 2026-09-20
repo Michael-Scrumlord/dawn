@@ -4,21 +4,38 @@
   "sections": {
     "footer": {
       "type": "footer",
-      "blocks": {},
-      "block_order": [],
+      "blocks": {
+        "brand_information": {
+          "type": "brand_information",
+          "settings": {
+            "show_social": true
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "heading": "The Nug Manifesto",
+            "subtext": "<p>We believe life is too short for soggy tenders. Every piece of NugMe gear is made for true crunch connoisseurs. Stay crispy!</p>"
+          }
+        }
+      },
+      "block_order": [
+        "brand_information",
+        "text"
+      ],
       "settings": {
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-4",
         "newsletter_enable": true,
-        "newsletter_heading": "Subscribe to our emails",
-        "enable_follow_on_shop": true,
+        "newsletter_heading": "Join The Crispy Crew • Get 10% Off",
+        "enable_follow_on_shop": false,
         "show_social": true,
-        "enable_country_selector": true,
-        "enable_language_selector": true,
+        "enable_country_selector": false,
+        "enable_language_selector": false,
         "payment_enable": true,
         "show_policy": true,
         "margin_top": 0,
-        "padding_top": 36,
-        "padding_bottom": 36
+        "padding_top": 48,
+        "padding_bottom": 48
       }
     }
   },

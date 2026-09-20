@@ -1,52 +1,30 @@
 {
   "sections": {
-    "image_banner": {
-      "type": "image-banner",
-      "blocks": {
-        "heading": {
-          "type": "heading",
-          "settings": {
-            "heading": "Browse our latest products",
-            "heading_size": "h0"
-          }
-        },
-        "button": {
-          "type": "buttons",
-          "settings": {
-            "button_label_1": "Shop all",
-            "button_link_1": "shopify://collections/all",
-            "button_style_secondary_1": true,
-            "button_label_2": "",
-            "button_link_2": "",
-            "button_style_secondary_2": false
-          }
-        }
-      },
-      "block_order": [
-        "heading",
-        "button"
-      ],
+    "nug_hero": {
+      "type": "nug-hero",
       "settings": {
-        "image_overlay_opacity": 40,
-        "image_height": "large",
-        "desktop_content_position": "bottom-center",
-        "show_text_box": false,
-        "image_behavior": "none",
-        "desktop_content_alignment": "center",
-        "color_scheme": "scheme-3",
-        "mobile_content_alignment": "center",
-        "stack_images_on_mobile": false,
-        "show_text_below": false
+        "color_scheme": "scheme-1",
+        "badge_icon": "⚡",
+        "badge_text": "HANDCRAFTED & DIGITAL STUDIO",
+        "heading_line_1": "Artisan Crafts &",
+        "heading_highlight": "Digital Creations",
+        "subheading": "Hand-bound books, custom sewing & lace, heavyweight canvas bags, woodburning art, independent software subscriptions, and original music. Every piece crafted with character.",
+        "button_label_1": "Explore The Studio",
+        "button_link_1": "shopify://collections/all",
+        "button_label_2": "Software & Digital",
+        "button_link_2": "shopify://collections/all",
+        "padding_top": 56,
+        "padding_bottom": 56
       }
     },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
-        "title": "Featured products",
-        "heading_size": "h2",
-        "description": "",
-        "show_description": false,
-        "description_style": "body",
+        "title": "Studio Catalog & Featured Works",
+        "heading_size": "h1",
+        "description": "<p>Discover handmade maker goods, software tools, and original sounds.</p>",
+        "show_description": true,
+        "description_style": "subtitle",
         "collection": "all",
         "products_to_show": 8,
         "columns_desktop": 4,
@@ -55,21 +33,21 @@
         "show_view_all": true,
         "view_all_style": "solid",
         "enable_desktop_slider": false,
-        "swipe_on_mobile": false,
-        "image_ratio": "adapt",
+        "swipe_on_mobile": true,
+        "image_ratio": "square",
         "image_shape": "default",
         "show_secondary_image": true,
         "show_vendor": false,
         "show_rating": false,
-        "quick_add": "none",
+        "quick_add": "standard",
         "columns_mobile": "2",
-        "padding_top": 44,
-        "padding_bottom": 36
+        "padding_top": 48,
+        "padding_bottom": 64
       }
     }
   },
   "order": [
-    "image_banner",
+    "nug_hero",
     "featured_collection"
   ]
 }
