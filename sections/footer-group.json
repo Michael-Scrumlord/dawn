@@ -14,8 +14,8 @@
         "text": {
           "type": "text",
           "settings": {
-            "heading": "The Nug Manifesto",
-            "subtext": "<p>We believe life is too short for soggy tenders. Every piece of NugMe gear is made for true crunch connoisseurs. Stay crispy!</p>"
+            "heading": "The Independent Workshop",
+            "subtext": "<p>Handcrafted physical goods, developer tools, and original audio from one multidisciplinary studio.</p>"
           }
         }
       },
@@ -26,7 +26,7 @@
       "settings": {
         "color_scheme": "scheme-4",
         "newsletter_enable": true,
-        "newsletter_heading": "Join The Crispy Crew • Get 10% Off",
+        "newsletter_heading": "Studio Dispatch: Subscribe for release drops & 10% off your first order.",
         "enable_follow_on_shop": false,
         "show_social": true,
         "enable_country_selector": false,

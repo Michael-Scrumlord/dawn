@@ -10,277 +10,67 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
-
-  .nug-hero-section {
-    position: relative;
-    background: radial-gradient(circle at 82% 25%, rgba(247, 213, 112, 0.45) 0%, rgba(228, 161, 58, 0.12) 40%, transparent 65%),
-                radial-gradient(circle at 10% 80%, rgba(247, 213, 112, 0.3) 0%, transparent 45%),
-                #FFFDF7;
-    border-bottom: 1px solid rgba(228, 161, 58, 0.15);
-    overflow: hidden;
-  }
-
-  .nug-hero-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 3rem;
-    align-items: center;
-  }
-
-  @media screen and (min-width: 850px) {
-    .nug-hero-grid {
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 4rem;
-    }
-  }
-
-  .nug-hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.6rem 1.4rem;
-    border-radius: 9999px;
-    background: rgba(247, 213, 112, 0.95);
-    backdrop-filter: blur(8px);
-    border: 1.5px solid rgba(228, 161, 58, 0.45);
-    color: #3E2614;
-    font-weight: 800;
-    font-size: 0.95rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 14px rgba(247, 213, 112, 0.4);
-  }
-
-  .nug-hero-title {
-    font-size: clamp(2.8rem, 4.6vw + 0.5rem, 4.8rem);
-    font-weight: 900;
-    line-height: 1.1;
-    letter-spacing: -0.035em;
-    color: #3E2614;
-    margin-bottom: 1.5rem;
-  }
-
-  .nug-hero-title span.highlight {
-    color: #E4A13A;
-    position: relative;
-    display: inline-block;
-  }
-
-  .nug-hero-title span.highlight::after {
-    content: '';
-    position: absolute;
-    bottom: 6px;
-    left: 0;
-    width: 100%;
-    height: 10px;
-    background: rgba(247, 213, 112, 0.45);
-    border-radius: 4px;
-    z-index: -1;
-  }
-
-  .nug-hero-subtitle {
-    font-size: 1.35rem;
-    line-height: 1.65;
-    color: #4A3220;
-    margin-bottom: 2.5rem;
-    max-width: 620px;
-    font-weight: 500;
-  }
-
-  .nug-hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.2rem;
-    align-items: center;
-    margin-bottom: 2.8rem;
-  }
-
-  .nug-hero-actions .button {
-    font-size: 1.2rem;
-    font-weight: 800;
-    padding: 1.1rem 2.4rem;
-    min-height: 56px;
-    border-radius: 9999px;
-  }
-
-  .nug-hero-actions .button--secondary {
-    background: #FFFFFF;
-    border: 2.5px solid #E4A13A;
-    color: #3E2614;
-    font-weight: 800;
-    box-shadow: 0 4px 12px rgba(62, 38, 20, 0.05);
-    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .nug-hero-actions .button--secondary:hover {
-    background: #FFF6DE;
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 6px 18px rgba(228, 161, 58, 0.25);
-  }
-
-  .nug-hero-trust {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding-top: 1.8rem;
-    border-top: 1px solid rgba(62, 38, 20, 0.12);
-  }
-
-  .nug-trust-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.55rem 1.2rem;
-    background: #FFFFFF;
-    border: 1.5px solid rgba(228, 161, 58, 0.3);
-    border-radius: 9999px;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #3E2614;
-    box-shadow: 0 2px 8px rgba(62, 38, 20, 0.05);
-  }
-
-  /* Mascot Visual Showcase */
-  .nug-hero-visual {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .nug-mascot-backdrop {
-    position: absolute;
-    width: 380px;
-    height: 380px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(247, 213, 112, 0.75) 0%, rgba(228, 161, 58, 0.25) 65%, transparent 100%);
-    filter: blur(28px);
-    z-index: 1;
-  }
-
-  .nug-mascot-card {
-    position: relative;
-    z-index: 2;
-    background: linear-gradient(150deg, #FFFFFF 0%, #FFF8EA 100%);
-    border: 2.5px solid rgba(228, 161, 58, 0.35);
-    border-radius: 40px;
-    padding: 2.8rem 2.2rem 2.2rem;
-    box-shadow: 0 24px 60px -10px rgba(62, 38, 20, 0.16), 0 0 40px rgba(247, 213, 112, 0.3);
-    text-align: center;
-    width: 100%;
-    max-width: 400px;
-  }
-
-  .nug-mascot-img {
-    width: 240px;
-    height: 240px;
-    object-fit: contain;
-    filter: drop-shadow(0 14px 22px rgba(62, 38, 20, 0.22));
-    animation: nug-float 3.5s ease-in-out infinite;
-  }
-
-  .nug-pill-tag {
-    position: absolute;
-    padding: 0.65rem 1.35rem;
-    background: #FFFFFF;
-    border: 2px solid #E4A13A;
-    border-radius: 9999px;
-    font-weight: 800;
-    font-size: 0.95rem;
-    color: #2A180B;
-    box-shadow: 0 8px 20px rgba(62, 38, 20, 0.15);
-    z-index: 3;
-    white-space: nowrap;
-  }
-
-  .nug-pill-tag--top {
-    top: 15px;
-    right: -20px;
-    transform: rotate(6deg);
-  }
-
-  .nug-pill-tag--bottom {
-    bottom: 25px;
-    left: -20px;
-    transform: rotate(-5deg);
-  }
 {%- endstyle -%}
 
-<div class="nug-hero-section color-{{ section.settings.color_scheme }} gradient">
-  <div class="page-width section-{{ section.id }}-padding">
-    <div class="nug-hero-grid">
-      <!-- Content Column -->
-      <div class="nug-hero-content">
-        {%- if section.settings.badge_text != blank -%}
-          <div class="nug-hero-badge">
-            <span>{{ section.settings.badge_icon | default: '⚡' }}</span>
-            <span>{{ section.settings.badge_text }}</span>
-          </div>
-        {%- endif -%}
+<div class="nug-hero-section color-{{ section.settings.color_scheme }}">
+  <details class="nug-hero-disclosure" open>
+    {%- if section.settings.enable_collapse -%}
+      <summary class="nug-hero-toggle page-width" aria-label="Toggle introduction">
+        <span class="nug-hero-toggle__control" aria-hidden="true">
+          <svg class="nug-hero-toggle__icon" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 8L8 2L14 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </summary>
+    {%- endif -%}
 
-        <h1 class="nug-hero-title">
-          {{ section.settings.heading_line_1 }}<br>
-          <span class="highlight">{{ section.settings.heading_highlight }}</span>
-        </h1>
-
-        <p class="nug-hero-subtitle">
-          {{ section.settings.subheading }}
-        </p>
-
-        <div class="nug-hero-actions">
-          {%- if section.settings.button_label_1 != blank -%}
-            <a href="{{ section.settings.button_link_1 }}" class="button button--primary">
-              {{ section.settings.button_label_1 }}
-            </a>
+    <div class="page-width section-{{ section.id }}-padding">
+      <div class="nug-hero-grid">
+        <div class="nug-hero-content">
+          {%- if section.settings.badge_text != blank -%}
+            <p class="nug-hero-kicker">{{ section.settings.badge_text }}</p>
           {%- endif -%}
 
-          {%- if section.settings.button_label_2 != blank -%}
-            <a href="{{ section.settings.button_link_2 }}" class="button button--secondary">
-              {{ section.settings.button_label_2 }}
-            </a>
-          {%- endif -%}
+          <h1 class="nug-hero-title">
+            {{ section.settings.heading_line_1 }}
+            <span>{{ section.settings.heading_highlight }}</span>
+          </h1>
+
+          <p class="nug-hero-subtitle">{{ section.settings.subheading }}</p>
+
+          <div class="nug-hero-actions">
+            {%- if section.settings.button_label_1 != blank -%}
+              <a href="{{ section.settings.button_link_1 }}" class="button button--primary">
+                {{ section.settings.button_label_1 }}
+              </a>
+            {%- endif -%}
+            {%- if section.settings.button_label_2 != blank -%}
+              <a href="{{ section.settings.button_link_2 }}" class="button button--secondary">
+                {{ section.settings.button_label_2 }}
+              </a>
+            {%- endif -%}
+          </div>
         </div>
 
-        <div class="nug-hero-trust">
-          <div class="nug-trust-item">
-            <span>🛠️</span>
-            <span>Artisan Handcrafted</span>
-          </div>
-          <div class="nug-trust-item">
-            <span>💾</span>
-            <span>Instant Digital Access</span>
-          </div>
-          <div class="nug-trust-item">
-            <span>📦</span>
-            <span>Insured Shipping</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Mascot Showcase Column -->
-      <div class="nug-hero-visual">
-        <div class="nug-mascot-backdrop"></div>
-        <div class="nug-mascot-card">
-          <div class="nug-pill-tag nug-pill-tag--top">⚡ 100% Original Creations</div>
-          <img
-            src="{{ 'nug-mascot.png' | asset_url }}"
-            alt="NugMe Mascot"
-            width="220"
-            height="220"
-            class="nug-mascot-img"
-          >
-          <div class="nug-pill-tag nug-pill-tag--bottom">🔥 Gourmet Heat Attack!</div>
-          <div style="margin-top: 1.2rem; font-weight: 900; font-size: 1.35rem; color: #3E2614; letter-spacing: -0.02em;">
-            Meet Nuggy
-          </div>
-          <div style="font-size: 1.0rem; font-weight: 700; color: #7A5538; margin-top: 0.25rem;">
-            Studio Mascot & Craft Guardian
+        <div class="nug-hero-visual" aria-label="NugMe Studio Character">
+          <div class="nug-mascot-frame">
+            <span class="nug-mascot-badge">Studio Mascot</span>
+            <img
+              src="{{ 'nug-mascot.png' | asset_url }}"
+              alt="Nuggy, NugMe Studio Mascot"
+              width="240"
+              height="240"
+              class="nug-mascot-img"
+            >
+            <div class="nug-mascot-caption">
+              <strong>Nuggy</strong>
+              <span>Workshop Quality Mascot</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </details>
 </div>
 
 {% schema %}
@@ -297,39 +87,33 @@
     },
     {
       "type": "text",
-      "id": "badge_icon",
-      "label": "Badge Icon",
-      "default": "⚡"
-    },
-    {
-      "type": "text",
       "id": "badge_text",
-      "label": "Badge Text",
-      "default": "FRESH OFF THE FRYER"
+      "label": "Kicker",
+      "default": "NUGME STUDIO"
     },
     {
       "type": "text",
       "id": "heading_line_1",
-      "label": "Heading Line 1",
-      "default": "Gear For The Real"
+      "label": "Heading line 1",
+      "default": "One studio."
     },
     {
       "type": "text",
       "id": "heading_highlight",
-      "label": "Heading Highlighted Word",
-      "default": "Nugget Lovers"
+      "label": "Heading line 2",
+      "default": "An unreasonable number of tools."
     },
     {
       "type": "textarea",
       "id": "subheading",
       "label": "Subheading",
-      "default": "Welcome to nugme.org — the official home of crispy apparel, hot sauces, and collectible merchandise crafted for the crunch obsessed."
+      "default": "Hand-bound books, sewn canvas goods, lace, woodburning, software, and original audio from one independent studio."
     },
     {
       "type": "text",
       "id": "button_label_1",
       "label": "First button label",
-      "default": "Shop The Drop"
+      "default": "Browse the collection"
     },
     {
       "type": "url",
@@ -341,13 +125,19 @@
       "type": "text",
       "id": "button_label_2",
       "label": "Second button label",
-      "default": "Explore Sauces"
+      "default": "Explore digital goods"
     },
     {
       "type": "url",
       "id": "button_link_2",
       "label": "Second button link",
       "default": "/collections/all"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collapse",
+      "label": "Allow visitors to collapse the hero",
+      "default": true
     },
     {
       "type": "range",
@@ -357,7 +147,7 @@
       "step": 4,
       "unit": "px",
       "label": "Top padding",
-      "default": 48
+      "default": 64
     },
     {
       "type": "range",
@@ -367,7 +157,7 @@
       "step": 4,
       "unit": "px",
       "label": "Bottom padding",
-      "default": 48
+      "default": 64
     }
   ],
   "presets": [

@@ -3859,6 +3859,505 @@ details-disclosure > details {
   color: #3E2614 !important;
 }
 
+/* NugMe Studio: Refined artisan craft & digital goods theme styles */
 
+:root {
+  --nug-crust: #E4A13A;
+  --nug-yellow: #F6C445;
+  --nug-dark: #2D1A0E;
+  --nug-cream: #FFFDF7;
+  --nug-surface: #FFF9EE;
+  --nug-border: rgba(45, 26, 14, 0.12);
+  --nug-border-strong: rgba(45, 26, 14, 0.24);
+}
 
+h1,
+h2,
+h3,
+.nug-brand-title {
+  font-family: var(--font-heading-family);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
 
+.utility-bar {
+  border-bottom: 1px solid var(--nug-border);
+}
+
+.announcement-bar {
+  padding: 0.6rem 0;
+}
+
+.announcement-bar__message {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--nug-dark);
+}
+
+.header-wrapper {
+  border-bottom: 1px solid rgba(45, 26, 14, 0.08);
+}
+
+.nug-header-mascot {
+  filter: none;
+  transition: transform 0.25s ease;
+}
+
+.header__heading-link:hover .nug-header-mascot {
+  transform: rotate(-5deg) scale(1.05);
+}
+
+.nug-hero-section {
+  background: linear-gradient(180deg, #F9D066 0%, #F5C54A 100%);
+  border-bottom: 0.2rem solid var(--nug-dark);
+  position: relative;
+}
+
+.nug-hero-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0.8rem;
+  color: rgba(45, 26, 14, 0.75);
+  cursor: pointer;
+  list-style: none;
+}
+
+.nug-hero-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.nug-hero-toggle__control {
+  display: grid;
+  place-items: center;
+  width: 3.6rem;
+  height: 2.4rem;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.nug-hero-toggle__icon {
+  width: 1.4rem;
+  height: auto;
+  transition: transform 0.2s ease;
+}
+
+.nug-hero-disclosure:not([open]) .nug-hero-toggle__icon {
+  transform: rotate(180deg);
+}
+
+.nug-hero-disclosure:not([open]) .nug-hero-toggle {
+  padding-bottom: 0.8rem;
+}
+
+.nug-hero-toggle:hover .nug-hero-toggle__control {
+  background: rgba(45, 26, 14, 0.08);
+}
+
+.nug-hero-toggle:focus-visible {
+  outline: none;
+}
+
+.nug-hero-toggle:focus-visible .nug-hero-toggle__control {
+  outline: 0.2rem solid var(--nug-dark);
+  outline-offset: 0.3rem;
+}
+
+.nug-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(30rem, 0.8fr);
+  gap: clamp(3rem, 6vw, 8rem);
+  align-items: center;
+}
+
+.nug-hero-content {
+  max-width: 72rem;
+}
+
+.nug-hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 2rem;
+  padding: 0.5rem 1.4rem;
+  background: rgba(45, 26, 14, 0.08);
+  border: 1px solid rgba(45, 26, 14, 0.14);
+  border-radius: 9999px;
+  color: var(--nug-dark);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nug-hero-title {
+  margin: 0;
+  color: var(--nug-dark);
+  font-size: clamp(4.4rem, 5.6vw, 7.8rem);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+
+.nug-hero-title span {
+  display: inline-block;
+  color: inherit;
+}
+
+.nug-hero-subtitle {
+  max-width: 60rem;
+  margin: 2.2rem 0 3rem;
+  color: rgba(45, 26, 14, 0.86);
+  font-size: 1.85rem;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.nug-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem;
+}
+
+.nug-hero-actions .button {
+  min-height: 5.2rem;
+  padding: 0 2.8rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 1.45rem;
+  letter-spacing: 0.01em;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nug-hero-actions .button--primary {
+  background: var(--nug-dark);
+  color: #FFFDF7;
+  border: 1px solid var(--nug-dark);
+  box-shadow: 0 4px 14px rgba(45, 26, 14, 0.18);
+}
+
+.nug-hero-actions .button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(45, 26, 14, 0.25);
+}
+
+.nug-hero-actions .button--secondary {
+  background: #FFFDF7;
+  color: var(--nug-dark);
+  border: 1px solid rgba(45, 26, 14, 0.2);
+  box-shadow: 0 2px 8px rgba(45, 26, 14, 0.06);
+}
+
+.nug-hero-actions .button--secondary:hover {
+  background: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(45, 26, 14, 0.12);
+  border-color: rgba(45, 26, 14, 0.35);
+}
+
+.nug-hero-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.nug-mascot-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 38rem);
+  padding: 3rem 3.2rem 2.6rem;
+  background: #FFFDF7;
+  border-radius: 2rem;
+  border: 0.2rem solid var(--nug-dark);
+  box-shadow: 0 16px 36px -4px rgba(45, 26, 14, 0.16), 0 4px 10px -2px rgba(45, 26, 14, 0.08);
+  text-align: center;
+}
+
+.nug-mascot-badge {
+  display: inline-block;
+  padding: 0.4rem 1.2rem;
+  background: #FFF2CE;
+  border: 1px solid rgba(45, 26, 14, 0.16);
+  border-radius: 9999px;
+  color: var(--nug-dark);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 1.8rem;
+}
+
+.nug-mascot-img {
+  display: block;
+  width: min(100%, 23rem);
+  height: auto;
+  margin: 0 auto;
+  filter: drop-shadow(0 10px 20px rgba(45, 26, 14, 0.14));
+}
+
+.nug-mascot-caption {
+  margin-top: 1.8rem;
+}
+
+.nug-mascot-caption strong {
+  display: block;
+  font-family: var(--font-heading-family);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--nug-dark);
+}
+
+.nug-mascot-caption span {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: rgba(45, 26, 14, 0.65);
+}
+
+.nug-departments {
+  background: #FFFDF7;
+  border-bottom: 1px solid var(--nug-border);
+}
+
+.nug-departments__inner {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.nug-departments__title {
+  margin: 0 0 1.2rem;
+  color: rgba(45, 26, 14, 0.65);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nug-departments__list {
+  display: flex;
+  gap: 0.8rem;
+  overflow-x: auto;
+  padding: 0.2rem 0.2rem 0.8rem;
+  scrollbar-width: thin;
+}
+
+.nug-department {
+  flex: 0 0 auto;
+  padding: 0.8rem 1.6rem;
+  border: 1px solid rgba(45, 26, 14, 0.14);
+  border-radius: 9999px;
+  background: #FFFFFF;
+  color: var(--nug-dark);
+  font-size: 1.35rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.nug-department:hover,
+.nug-department:focus-visible {
+  background: #FFF4D4;
+  border-color: rgba(45, 26, 14, 0.28);
+  color: var(--nug-dark);
+  transform: translateY(-1px);
+}
+
+.nug-department.is-active {
+  background: var(--nug-dark);
+  border-color: var(--nug-dark);
+  color: #FFFDF7;
+}
+
+.collection__title .title {
+  margin-bottom: 0.8rem;
+  color: var(--nug-dark);
+  font-family: var(--font-heading-family);
+  font-size: clamp(3.2rem, 4vw, 5.2rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.collection__description {
+  color: rgba(45, 26, 14, 0.75);
+  font-size: 1.65rem;
+  max-width: 64rem;
+}
+
+.product-grid {
+  --grid-desktop-horizontal-spacing: 2.4rem;
+  --grid-mobile-horizontal-spacing: 1.4rem;
+  column-gap: 2.4rem;
+  row-gap: 3.4rem;
+}
+
+.card {
+  border: 1px solid rgba(45, 26, 14, 0.1);
+  border-radius: 1.4rem;
+  background: #FFFFFF;
+  box-shadow: 0 2px 8px -2px rgba(45, 26, 14, 0.05);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  overflow: hidden;
+}
+
+.card-wrapper:hover .card {
+  transform: translateY(-3px);
+  border-color: rgba(45, 26, 14, 0.22);
+  box-shadow: 0 12px 28px -6px rgba(45, 26, 14, 0.1);
+}
+
+.nug-card-placeholder {
+  min-height: 22rem;
+  background: #FFF9EE;
+  border-bottom: 1px solid rgba(45, 26, 14, 0.08);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-grid > *:nth-child(3n + 2) .nug-card-placeholder {
+  background: #FAF2E9;
+}
+
+.product-grid > *:nth-child(3n) .nug-card-placeholder {
+  background: #F0F4EE;
+}
+
+.nug-placeholder-art {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.4rem 1.6rem;
+  gap: 0.9rem;
+}
+
+.nug-placeholder-discipline {
+  color: var(--nug-dark);
+  font-family: var(--font-heading-family);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+}
+
+.nug-placeholder-subtitle {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  background: rgba(45, 26, 14, 0.06);
+  color: rgba(45, 26, 14, 0.72);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.card__information {
+  padding: 1.8rem 1.6rem 1.4rem;
+}
+
+.card__heading {
+  font-family: var(--font-body-family);
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: var(--nug-dark);
+}
+
+.quick-add {
+  margin: 0 1.6rem 1.6rem;
+}
+
+.quick-add__submit {
+  min-height: 4.4rem;
+  border: 1px solid rgba(45, 26, 14, 0.18);
+  border-radius: 9999px;
+  background: #FFFDF7;
+  color: var(--nug-dark);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+}
+
+.quick-add__submit:hover {
+  background: var(--nug-dark);
+  color: #FFFDF7;
+  border-color: var(--nug-dark);
+  box-shadow: 0 4px 12px rgba(45, 26, 14, 0.15);
+}
+
+@media screen and (max-width: 849px) {
+  .nug-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 3.6rem;
+  }
+
+  .nug-hero-content {
+    max-width: none;
+  }
+
+  .nug-hero-visual {
+    padding: 0;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .nug-hero-title {
+    font-size: clamp(3.8rem, 12vw, 5.6rem);
+  }
+
+  .nug-hero-subtitle {
+    font-size: 1.65rem;
+  }
+
+  .nug-hero-actions {
+    display: grid;
+  }
+
+  .nug-hero-actions .button {
+    width: 100%;
+  }
+
+  .nug-mascot-frame {
+    width: 100%;
+    padding: 2.4rem 2rem;
+  }
+
+  .nug-mascot-img {
+    width: 19rem;
+  }
+
+  .collection__title .title {
+    font-size: 3.4rem;
+  }
+
+  .product-grid {
+    column-gap: 1.2rem;
+    row-gap: 2.2rem;
+  }
+
+  .nug-card-placeholder {
+    min-height: 16rem;
+  }
+
+  .nug-placeholder-discipline {
+    font-size: 1.65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nug-header-mascot,
+  .nug-mascot-img,
+  .card,
+  .button,
+  .quick-add__submit {
+    transition: none !important;
+    transform: none !important;
+  }
+}

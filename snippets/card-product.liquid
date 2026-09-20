@@ -46,17 +46,16 @@
       <div
         class="
           card card--{{ settings.card_style }}
-          {% if card_product.featured_media %} card--media{% else %} card--text{% endif %}
+          {% if card_product.featured_media %} card--media{% else %} card--media card--nug-placeholder{% endif %}
           {% if settings.card_style == 'card' %} color-{{ settings.card_color_scheme }} gradient{% endif %}
           {% if image_shape and image_shape != 'default' %} card--shape{% endif %}
           {% if extend_height %} card--extend-height{% endif %}
-          {% if card_product.featured_media == nil and settings.card_style == 'card' %} ratio{% endif %}
           {% if horizontal_class %} card--horizontal{% endif %}
         "
         style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
       >
         <div
-          class="card__inner {% if settings.card_style == 'standard' %}color-{{ settings.card_color_scheme }} gradient{% endif %}{% if card_product.featured_media or settings.card_style == 'standard' %} ratio{% endif %}"
+          class="card__inner {% if settings.card_style == 'standard' %}color-{{ settings.card_color_scheme }} gradient{% endif %} ratio"
           style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
         >
           {%- if card_product.featured_media -%}
@@ -112,26 +111,26 @@
               <div class="media media--transparent nug-card-placeholder">
                 <div class="nug-placeholder-art">
                   {%- if card_product.type contains 'Software' -%}
-                    <div class="nug-placeholder-icon">💻</div>
-                    <div class="nug-placeholder-badge">DIGITAL SUITE</div>
+                    <span class="nug-placeholder-discipline">SOFTWARE</span>
+                    <span class="nug-placeholder-subtitle">Audio &amp; Dev Tools</span>
                   {%- elsif card_product.type contains 'Music' -%}
-                    <div class="nug-placeholder-icon">🎵</div>
-                    <div class="nug-placeholder-badge">ORIGINAL SOUNDTRACK</div>
+                    <span class="nug-placeholder-discipline">AUDIO</span>
+                    <span class="nug-placeholder-subtitle">Original Sounds &amp; Packs</span>
                   {%- elsif card_product.type contains 'Bookbinding' -%}
-                    <div class="nug-placeholder-icon">📖</div>
-                    <div class="nug-placeholder-badge">HAND-BOUND</div>
+                    <span class="nug-placeholder-discipline">BOOKBINDING</span>
+                    <span class="nug-placeholder-subtitle">Hand-Bound Editions</span>
                   {%- elsif card_product.type contains 'Bags' or card_product.type contains 'Sewing' -%}
-                    <div class="nug-placeholder-icon">👜</div>
-                    <div class="nug-placeholder-badge">MAKER SEWN</div>
+                    <span class="nug-placeholder-discipline">CANVAS GOODS</span>
+                    <span class="nug-placeholder-subtitle">Tailored Studio Gear</span>
                   {%- elsif card_product.type contains 'Woodburning' -%}
-                    <div class="nug-placeholder-icon">🪵</div>
-                    <div class="nug-placeholder-badge">PYROGRAPHY ART</div>
+                    <span class="nug-placeholder-discipline">PYROGRAPHY</span>
+                    <span class="nug-placeholder-subtitle">Live-Edge Hardwood</span>
                   {%- elsif card_product.type contains 'Lace' -%}
-                    <div class="nug-placeholder-icon">🪡</div>
-                    <div class="nug-placeholder-badge">ARTISAN LACE</div>
+                    <span class="nug-placeholder-discipline">LACEWORK</span>
+                    <span class="nug-placeholder-subtitle">Artisan Heirloom Lace</span>
                   {%- else -%}
-                    <img src="{{ 'nug-mascot.png' | asset_url }}" alt="NugMe Studio" width="80" height="80" class="nug-placeholder-mascot">
-                    <div class="nug-placeholder-badge">STUDIO CRAFT</div>
+                    <img src="{{ 'nug-mascot.png' | asset_url }}" alt="NugMe Studio" width="70" height="70" class="nug-placeholder-mascot">
+                    <span class="nug-placeholder-subtitle">Studio Release</span>
                   {%- endif -%}
                 </div>
               </div>

@@ -1,106 +1,15 @@
-{%- style -%}
-  .nug-cat-bar-wrapper {
-    padding: 1.5rem 0 2.5rem;
-  }
-
-  .nug-cat-bar-title {
-    font-size: 0.95rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: #8A6548;
-    margin-bottom: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .nug-cat-chips-scroll {
-    display: flex;
-    gap: 0.9rem;
-    overflow-x: auto;
-    padding-bottom: 0.75rem;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .nug-cat-chips-scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .nug-cat-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.85rem 1.6rem;
-    border-radius: 9999px;
-    background: #FFFFFF;
-    border: 2px solid rgba(228, 161, 58, 0.35);
-    color: #3E2614;
-    text-decoration: none;
-    font-weight: 800;
-    font-size: 1.08rem;
-    white-space: nowrap;
-    box-shadow: 0 3px 10px rgba(62, 38, 20, 0.06);
-    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .nug-cat-chip:hover {
-    background: #FFF6DE;
-    border-color: #E4A13A;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(228, 161, 58, 0.28);
-    color: #3E2614;
-  }
-
-  .nug-cat-chip--active {
-    background: #E4A13A;
-    border-color: #E4A13A;
-    color: #FFFFFF;
-    box-shadow: 0 4px 16px rgba(228, 161, 58, 0.4);
-  }
-
-  .nug-cat-chip--active:hover {
-    background: #D49028;
-    color: #FFFFFF;
-  }
-{%- endstyle -%}
-
-<div class="color-{{ section.settings.color_scheme }} gradient">
-  <div class="page-width nug-cat-bar-wrapper">
-    <div class="nug-cat-bar-title">
-      <span>{{ section.settings.subheading | default: 'EXPLORE BY MEDIUM & DISCIPLINE' }}</span>
-    </div>
-    <div class="nug-cat-chips-scroll">
-      <a href="/collections/all" class="nug-cat-chip nug-cat-chip--active">
-        <span>✨</span>
-        <span>All Studio Works</span>
-      </a>
-      <a href="/collections/all" class="nug-cat-chip">
-        <span>💻</span>
-        <span>Software & Subscriptions</span>
-      </a>
-      <a href="/collections/all" class="nug-cat-chip">
-        <span>🎵</span>
-        <span>Digital Music & Audio</span>
-      </a>
-      <a href="/collections/all" class="nug-cat-chip">
-        <span>📖</span>
-        <span>Hand-Bound Books</span>
-      </a>
-      <a href="/collections/all" class="nug-cat-chip">
-        <span>👜</span>
-        <span>Canvas Bags & Sewing</span>
-      </a>
-      <a href="/collections/all" class="nug-cat-chip">
-        <span>🪵</span>
-        <span>Woodburning Art</span>
-      </a>
-      <a href="/collections/all" class="nug-cat-chip">
-        <span>🪡</span>
-        <span>Artisan Lace</span>
-      </a>
-    </div>
+<div class="nug-departments color-{{ section.settings.color_scheme }}">
+  <div class="page-width nug-departments__inner">
+    <p class="nug-departments__title">{{ section.settings.subheading | default: 'Explore Studio Disciplines' }}</p>
+    <nav class="nug-departments__list" aria-label="Product disciplines">
+      <a href="{{ routes.all_products_collection_url }}" class="nug-department{% if request.path == routes.all_products_collection_url and search.terms == blank %} is-active{% endif %}">All Works</a>
+      <a href="{{ routes.search_url }}?q=software&amp;type=product" class="nug-department{% if search.terms contains 'software' %} is-active{% endif %}">Software</a>
+      <a href="{{ routes.search_url }}?q=music&amp;type=product" class="nug-department{% if search.terms contains 'music' %} is-active{% endif %}">Music &amp; Audio</a>
+      <a href="{{ routes.search_url }}?q=book&amp;type=product" class="nug-department{% if search.terms contains 'book' %} is-active{% endif %}">Books &amp; Journals</a>
+      <a href="{{ routes.search_url }}?q=canvas&amp;type=product" class="nug-department{% if search.terms contains 'canvas' %} is-active{% endif %}">Canvas Goods</a>
+      <a href="{{ routes.search_url }}?q=woodburning&amp;type=product" class="nug-department{% if search.terms contains 'woodburning' %} is-active{% endif %}">Woodburning Art</a>
+      <a href="{{ routes.search_url }}?q=lace&amp;type=product" class="nug-department{% if search.terms contains 'lace' %} is-active{% endif %}">Lacework</a>
+    </nav>
   </div>
 </div>
 
@@ -119,8 +28,8 @@
     {
       "type": "text",
       "id": "subheading",
-      "label": "Section Eyebrow",
-      "default": "EXPLORE BY MEDIUM & DISCIPLINE"
+      "label": "Section label",
+      "default": "Shop by category"
     }
   ],
   "presets": [

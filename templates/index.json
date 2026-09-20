@@ -4,32 +4,32 @@
       "type": "nug-hero",
       "settings": {
         "color_scheme": "scheme-1",
-        "badge_icon": "⚡",
-        "badge_text": "HANDCRAFTED & DIGITAL STUDIO",
-        "heading_line_1": "Artisan Crafts &",
-        "heading_highlight": "Digital Creations",
-        "subheading": "Hand-bound books, custom sewing & lace, heavyweight canvas bags, woodburning art, independent software subscriptions, and original music. Every piece crafted with character.",
-        "button_label_1": "Explore The Studio",
+        "badge_text": "NUGME STUDIO",
+        "heading_line_1": "NugMe studio.",
+        "heading_highlight": "Original products and digital creations.",
+        "subheading": "Hand-bound books, sewn canvas goods, lace, woodburning, software, and original audio from one independent studio.",
+        "button_label_1": "Browse the collection",
         "button_link_1": "shopify://collections/all",
-        "button_label_2": "Software & Digital",
-        "button_link_2": "shopify://collections/all",
-        "padding_top": 56,
-        "padding_bottom": 56
+        "button_label_2": "Explore digital goods",
+        "button_link_2": "/search?q=digital&type=product",
+        "enable_collapse": true,
+        "padding_top": 64,
+        "padding_bottom": 64
       }
     },
     "category_bar": {
       "type": "category-bar",
       "settings": {
         "color_scheme": "scheme-1",
-        "subheading": "EXPLORE STUDIO DISCIPLINES & RELEASES"
+        "subheading": "Explore Studio Disciplines"
       }
     },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
-        "title": "Studio Catalog & Featured Works",
+        "title": "Studio Releases & Featured Works",
         "heading_size": "h1",
-        "description": "<p>Discover handmade maker goods, software tools, and original sounds.</p>",
+        "description": "<p>Handcrafted maker goods, software utilities, and original audio from our workshop.</p>",
         "show_description": true,
         "description_style": "subtitle",
         "collection": "all",
@@ -48,7 +48,7 @@
         "show_rating": false,
         "quick_add": "standard",
         "columns_mobile": "2",
-        "padding_top": 24,
+        "padding_top": 40,
         "padding_bottom": 64
       }
     }
