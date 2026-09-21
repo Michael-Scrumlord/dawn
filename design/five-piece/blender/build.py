@@ -1,17 +1,19 @@
-"""Build Nuggy as a flat 2D cutout rig in Blender, traced from the canon art.
+"""Stage 3: build a traced character as a flat 2D cutout rig in Blender.
 
-The artwork is not drawn by hand here. `trace/quantize.py` posterizes
-`reference/nuggy-canon.webp` into named flat colour layers and `trace/contours.py`
-turns those into polygons; this script reads the resulting `trace/out/trace.json`
+The artwork is not drawn by hand here. `trace/quantize.py` posterizes the
+reference into named flat colour layers and `trace/contours.py` turns those
+into polygons; this script reads the resulting `trace/out/<char>/trace.json`
 and builds the scene. Every shape is a filled 2D curve, stacked on the local Z
 axis and parented to a root empty that stands the whole thing upright, so
-numpad-1 (front view) looks straight at him.
+numpad-1 (front view) looks straight at it.
 
 Features hang off socket empties: move `SOCKET_mouth` and the mouth moves,
-Mr. Potatohead style. Each socket also has a show/hide property on NUGGY_CTRL.
+Mr. Potatohead style. Each socket also has a show/hide property on the CTRL
+empty.
 
-    blender -b -P nuggy_build.py
-    blender -b -P nuggy_build.py -- --render out.png --set mouth=0
+    blender -b -P build.py -- --char nuggy
+    blender -b -P build.py -- --char nuggette --render out.png --set mouth=0
+    blender -b -P build.py -- --profile nuggette-crew
 
 Re-run it any time; it rebuilds the .blend from scratch.
 """
@@ -23,37 +25,11 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from profiles import PROFILES
+from characters import CHARACTERS
+from profiles import PROFILES, Profile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TRACE = os.path.join(HERE, "trace", "out", "trace.json")
-BLEND_PATH = os.path.join(HERE, "nuggy.blend")   # overridden by --profile
-
-# Reference-image pixel -> Blender unit. CX/CY put the character's own centre
-# at the origin so sockets and the camera share one frame.
-CX, CY, S = 153.0, 163.5, 3.5 / 306.0
-
-# Back to front. Regions are exact and disjoint, so this only decides which
-# side of a shared edge wins the quarter-pixel overlap the tracer adds.
-ZORDER = ["silhouette", "skinfill", "rim", "shade_deep", "shade", "amber", "gold_deep",
-          "gold_mid", "gold_base", "gold_light", "gold_pale", "eye_shadow",
-          "eye_white", "mouth_dk", "tongue", "iris", "pupil", "ink"]
 ZSTEP = 0.01
-LID_Z = len(ZORDER) * ZSTEP          # eyelids sit in front of every traced layer
-
-# Slots the rig can move, hide or replace. "body" is the static remainder.
-SLOTS = ["eye_L", "eye_R", "mouth", "sweat", "arm_L", "arm_R", "leg_L", "leg_R"]
-
-SLOT_HELP = {
-    "eye_L": "left eye, brow and lashes (0 hide, 1 show)",
-    "eye_R": "right eye, brow and lashes (0 hide, 1 show)",
-    "mouth": "mouth, teeth and tongue (0 hide, 1 show)",
-    "sweat": "sweat drops (0 hide, 1 show)",
-    "arm_L": "left arm and mitt (0 hide, 1 show)",
-    "arm_R": "right arm and fist (0 hide, 1 show)",
-    "leg_L": "left leg and foot (0 hide, 1 show)",
-    "leg_R": "right leg and foot (0 hide, 1 show)",
-}
 
 
 # --------------------------------------------------------------------- utils
@@ -90,10 +66,6 @@ def signed_area(pts):
                      for i in range(n))
 
 
-def to_blender(pt):
-    return ((pt[0] - CX) * S, (CY - pt[1]) * S)
-
-
 def new_coll(name, parent):
     c = bpy.data.collections.new(name)
     parent.children.link(c)
@@ -110,69 +82,6 @@ def add_empty(name, loc, parent, coll, size=0.14, kind="SPHERE"):
         e.matrix_parent_inverse.identity()
     e.location = loc
     return e
-
-
-def add_curve(name, rings, color, z, origin, parent, coll, prof=None):
-    """One curve object holding every ring of one colour in one slot.
-
-    Rings are drawn relative to `origin` (the slot's socket) so moving the
-    socket carries the whole feature.
-    """
-    cu = bpy.data.curves.new(name, "CURVE")
-    cu.dimensions = "2D"
-    cu.fill_mode = "BOTH"
-    cu.materials.append(get_mat(prof.color(color) if prof else color))
-    for ring in rings:
-        sp = cu.splines.new("POLY")
-        sp.points.add(len(ring) - 1)
-        for i, p in enumerate(ring):
-            x, y = to_blender(p)
-            sp.points[i].co = (x - origin[0], y - origin[1], 0.0, 1.0)
-        sp.use_cyclic_u = True
-    ob = bpy.data.objects.new(name, cu)
-    coll.objects.link(ob)
-    ob.parent = parent
-    ob.matrix_parent_inverse.identity()
-    ob.location = (0.0, 0.0, z)
-    return ob
-
-
-def add_eyelid(slot, group, origin, socket, coll, prof=None):
-    """A skin-coloured lid that closes over one eye.
-
-    Not traced -- the reference has both eyes open, so there is no closed
-    drawing to lift. The lid is a copy of that eye's own sclera outline, so it
-    closes with the eye's real curve instead of a rectangle, and it is sized to
-    the sclera rather than the whole eye group so the brow stays put.
-
-    Two copies are stacked: a dark one, and a gold one nudged up by a few
-    pixels. Scaling both from their shared top edge leaves a thin dark crescent
-    along the bottom, which is the lash line. scale.y 0 is open, 1 is shut.
-
-    Everything is in reference-image pixels; add_curve() maps to Blender units.
-    """
-    white = [sh for sh in group if sh["layer"] == "eye_white"]
-    if not white:
-        return []
-    ring = max((r for sh in white for r in sh["rings"]),
-               key=lambda r: abs(signed_area(r)))
-    cx = sum(p[0] for p in ring) / len(ring)
-    cy = sum(p[1] for p in ring) / len(ring)
-    grown = [(cx + (p[0] - cx) * 1.12, cy + (p[1] - cy) * 1.34) for p in ring]
-    top = min(p[1] for p in grown)
-    lash = (max(p[1] for p in grown) - top) * 0.10
-
-    anchor = to_blender((cx, top))
-    made = []
-    for name, col, dy, dz in (("lash", "#281108", 0.0, 0.0),
-                              ("lid", "#EBA126", -lash, 0.002)):
-        ob = add_curve("%s_%s" % (slot, name),
-                       [[(x, y + dy) for x, y in grown]],
-                       col, LID_Z + dz, anchor, socket, coll, prof)
-        ob.location = (anchor[0] - origin[0], anchor[1] - origin[1], LID_Z + dz)
-        ob.scale = (1.0, 0.0, 1.0)           # height 0 == eye open
-        made.append(ob)
-    return made
 
 
 def add_prop(ctrl, name, desc, default=1):
@@ -198,7 +107,7 @@ def drive_hidden(objs, ctrl, prop):
 
 # --------------------------------------------------------------------- build
 
-def setup_scene(scene, ortho=4.0):
+def setup_scene(scene, ortho, prefix):
     for eng in ("BLENDER_EEVEE_NEXT", "BLENDER_EEVEE", "CYCLES"):
         try:
             scene.render.engine = eng
@@ -217,46 +126,124 @@ def setup_scene(scene, ortho=4.0):
         pass
     scene.view_settings.look = "None"
 
-    cd = bpy.data.cameras.new("NUGGY_CAM")
+    cd = bpy.data.cameras.new(prefix + "CAM")
     cd.type = "ORTHO"
     cd.ortho_scale = ortho
-    cam = bpy.data.objects.new("NUGGY_CAM", cd)
+    cam = bpy.data.objects.new(prefix + "CAM", cd)
     cam.location = (0.0, -10.0, 0.0)
     cam.rotation_euler = (math.radians(90), 0.0, 0.0)
     scene.collection.objects.link(cam)
     scene.camera = cam
 
 
-def build(prof=None):
-    prof = prof or PROFILES["nuggy"]
-    data = json.load(open(TRACE))
+class Builder:
+    def __init__(self, ch, prof):
+        self.ch = ch
+        self.prof = prof
+        self.cx, self.cy = ch.centre
+        self.s = ch.scale
+        self.lid_z = len(ch.zorder) * ZSTEP   # lids sit in front of every layer
+
+    def to_blender(self, pt):
+        return ((pt[0] - self.cx) * self.s, (self.cy - pt[1]) * self.s)
+
+    def add_curve(self, name, rings, color, z, origin, parent, coll):
+        """One curve object holding every ring of one colour in one slot.
+
+        Rings are drawn relative to `origin` (the slot's socket) so moving the
+        socket carries the whole feature.
+        """
+        cu = bpy.data.curves.new(name, "CURVE")
+        cu.dimensions = "2D"
+        cu.fill_mode = "BOTH"
+        cu.materials.append(get_mat(self.prof.color(color, self.ch)))
+        for ring in rings:
+            sp = cu.splines.new("POLY")
+            sp.points.add(len(ring) - 1)
+            for i, p in enumerate(ring):
+                x, y = self.to_blender(p)
+                sp.points[i].co = (x - origin[0], y - origin[1], 0.0, 1.0)
+            sp.use_cyclic_u = True
+        ob = bpy.data.objects.new(name, cu)
+        coll.objects.link(ob)
+        ob.parent = parent
+        ob.matrix_parent_inverse.identity()
+        ob.location = (0.0, 0.0, z)
+        return ob
+
+    def add_eyelid(self, slot, group, origin, socket, coll):
+        """A skin-coloured lid that closes over one eye.
+
+        Not traced -- the references have both eyes open, so there is no closed
+        drawing to lift. The lid is a copy of that eye's own sclera outline, so
+        it closes with the eye's real curve instead of a rectangle, and it is
+        sized to the sclera rather than the whole eye group so the brow stays
+        put.
+
+        Two copies are stacked: a dark one, and a skin-coloured one nudged up by
+        a few pixels. Scaling both from their shared top edge leaves a thin dark
+        crescent along the bottom, which is the lash line. scale.y 0 is open,
+        1 is shut.
+        """
+        white = [sh for sh in group if sh["layer"] == "eye_white"]
+        if not white:
+            return []
+        ring = max((r for sh in white for r in sh["rings"]),
+                   key=lambda r: abs(signed_area(r)))
+        cx = sum(p[0] for p in ring) / len(ring)
+        cy = sum(p[1] for p in ring) / len(ring)
+        grown = [(cx + (p[0] - cx) * 1.12, cy + (p[1] - cy) * 1.34) for p in ring]
+        top = min(p[1] for p in grown)
+        lash = (max(p[1] for p in grown) - top) * 0.10
+
+        anchor = self.to_blender((cx, top))
+        skin = self.ch.colors["skinfill"]
+        made = []
+        for name, col, dy, dz in (("lash", self.ch.colors["ink"], 0.0, 0.0),
+                                  ("lid", skin, -lash, 0.002)):
+            ob = self.add_curve("%s_%s" % (slot, name),
+                                [[(x, y + dy) for x, y in grown]],
+                                col, self.lid_z + dz, anchor, socket, coll)
+            ob.location = (anchor[0] - origin[0], anchor[1] - origin[1],
+                           self.lid_z + dz)
+            ob.scale = (1.0, 0.0, 1.0)           # height 0 == eye open
+            made.append(ob)
+        return made
+
+
+def build(ch, prof):
+    data = json.load(open(os.path.join(ch.out_dir(), "trace.json")))
     shapes = data["shapes"]
     pivots = data.get("pivots", {})
+    B = Builder(ch, prof)
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    setup_scene(scene, prof.ortho)
+    prefix = ch.name.upper() + "_"
+    setup_scene(scene, prof.ortho or ch.ortho, prefix)
 
-    top = new_coll("NUGGY", scene.collection)
+    top = new_coll(ch.name.upper(), scene.collection)
     c_sock = new_coll("Sockets", top)
     c_feat = new_coll("Features", top)
 
-    root = add_empty("NUGGY_ROOT", (0, 0, 0), None, c_sock, size=0.5, kind="ARROWS")
+    root = add_empty(prefix + "ROOT", (0, 0, 0), None, c_sock, size=0.5, kind="ARROWS")
     root.rotation_euler = (math.radians(90), 0.0, 0.0)
-    ctrl = add_empty("NUGGY_CTRL", (0.0, -2.15, 0.0), root, c_sock,
+    lo = min(B.to_blender((0, p[1]))[1] for sh in shapes for r in sh["rings"]
+             for p in r)
+    ctrl = add_empty(prefix + "CTRL", (0.0, lo - 0.4, 0.0), root, c_sock,
                      size=0.25, kind="SPHERE")
 
     by_slot = {}
     for sh in shapes:
         by_slot.setdefault(sh["slot"], []).append(sh)
 
-    zindex = {layer: i for i, layer in enumerate(ZORDER)}
+    zindex = {layer: i for i, layer in enumerate(ch.zorder)}
     # Slot pieces of the same layer overlap slightly where the tracer cut a
     # limb off the torso; a tiny bias keeps them from z-fighting there.
-    bias_of = {s: i * 0.0005 for i, s in enumerate(["body"] + SLOTS)}
+    bias_of = {s: i * 0.0005 for i, s in enumerate(["body"] + ch.slots)}
     counts = {}
 
-    for slot in ["body"] + SLOTS:
+    for slot in ["body"] + ch.slots:
         group = by_slot.get(slot)
         if not group:
             continue
@@ -276,8 +263,8 @@ def build(prof=None):
         # though their own artwork is left alone.
         socket_at = prof.warp(pivot)
         warp_geom = slot == "body"
-        origin = (0.0, 0.0) if slot == "body" else to_blender(pivot)
-        socket_loc = (0.0, 0.0) if slot == "body" else to_blender(socket_at)
+        origin = (0.0, 0.0) if slot == "body" else B.to_blender(pivot)
+        socket_loc = (0.0, 0.0) if slot == "body" else B.to_blender(socket_at)
 
         if slot == "body":
             parent, coll = root, new_coll("Body", top)
@@ -286,9 +273,14 @@ def build(prof=None):
                                (socket_loc[0], socket_loc[1], 0.0), root, c_sock)
             coll = new_coll(slot, c_feat)
 
+        # One object per (layer, region). Pieces the region cut left
+        # overlapping must not share a curve: even-odd fill would turn the
+        # overlap into a hole, which is what put dark seams along every limb
+        # cut the first time round.
         by_layer = {}
         for sh in group:
-            by_layer.setdefault(sh["layer"], []).append(sh)
+            by_layer.setdefault((sh["layer"], sh.get("region", "body")),
+                                []).append(sh)
 
         def shape(ring):
             out = ring
@@ -299,23 +291,24 @@ def build(prof=None):
             return out
 
         objs = []
-        for layer, group_shapes in by_layer.items():
+        for (layer, region), group_shapes in by_layer.items():
             rings = [shape(r) for sh in group_shapes for r in sh["rings"]]
-            objs.append(add_curve(
-                "%s_%s" % (slot, layer), rings, group_shapes[0]["color"],
+            objs.append(B.add_curve(
+                "%s_%s_%s" % (slot, layer, region), rings,
+                group_shapes[0]["color"],
                 zindex.get(layer, 0) * ZSTEP + bias_of[slot],
-                origin, parent, coll, prof))
+                origin, parent, coll))
         counts[slot] = (len(objs), sum(len(r) for sh in group for r in sh["rings"]))
 
         if slot in ("eye_L", "eye_R"):
-            objs += add_eyelid(slot, group, origin, parent, coll, prof)
+            objs += B.add_eyelid(slot, group, origin, parent, coll)
 
         if slot != "body":
-            add_prop(ctrl, slot, SLOT_HELP[slot])
+            add_prop(ctrl, slot, ch.slot_help.get(slot, "0 hide, 1 show"))
             drive_hidden(objs, ctrl, slot)
 
     for k, (n, p) in sorted(counts.items()):
-        print("  %-7s %2d layers  %6d points" % (k, n, p))
+        print("  %-7s %2d objects  %6d points" % (k, n, p))
 
     bpy.context.view_layer.update()
     return ctrl
@@ -323,13 +316,24 @@ def build(prof=None):
 
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    name = argv[argv.index("--profile") + 1] if "--profile" in argv else "nuggy"
-    prof = PROFILES[name]
-    print("profile: %s -- %s" % (prof.name, prof.notes))
-    ctrl = build(prof)
+
+    def arg(flag, default=None):
+        return argv[argv.index(flag) + 1] if flag in argv else default
+
+    if "--profile" in argv:
+        prof = PROFILES[arg("--profile")]
+        ch = CHARACTERS[prof.character]
+    else:
+        ch = CHARACTERS[arg("--char", "nuggy")]
+        prof = Profile("identity", ch.name, notes="no warp, no regrade")
+    blend = prof.blend or ch.blend
+    print("character: %s -- %s" % (ch.name, ch.notes))
+    print("profile:   %s -- %s" % (prof.name, prof.notes))
+
+    ctrl = build(ch, prof)
 
     if "--set" in argv:
-        for pair in argv[argv.index("--set") + 1].split(","):
+        for pair in arg("--set").split(","):
             k, val = pair.split("=")
             ctrl[k.strip()] = int(val)
         # Assigning an ID property from Python does not tag the depsgraph, so
@@ -337,14 +341,13 @@ def main():
         ctrl.update_tag()
 
     if "--no-save" not in argv:
-        out = os.path.join(HERE, prof.blend)
+        out = os.path.join(HERE, blend)
         bpy.ops.wm.save_as_mainfile(filepath=out)
         print("saved", out)
 
     if "--render" in argv:
         bpy.context.view_layer.update()
-        bpy.context.scene.render.filepath = os.path.abspath(
-            argv[argv.index("--render") + 1])
+        bpy.context.scene.render.filepath = os.path.abspath(arg("--render"))
         bpy.ops.render.render(write_still=True)
         print("rendered", bpy.context.scene.render.filepath)
 

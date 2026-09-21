@@ -1,20 +1,28 @@
 # Blender todo
 
 Open work for `design/five-piece/blender`. How the pipeline works is in
-`README.md`, including the traps worth not rediscovering. This file is only
-what is left.
+`README.md`, including the traps worth not rediscovering. This file is only what
+is left.
 
 ## Where it stands
 
-Nuggy is traced from the canon art and rebuilt as flat vector curves. Measured
-against the reference at 306x327 he scores IoU 0.9984 with a median pixel error
-of 7/255. Nine groups move independently. Three animation clips run off socket
-keyframes.
+Two characters are traced from their art and rebuilt as flat vector curves on a
+socket rig.
 
-The remaining 4.6% of pixels that differ by more than 32/255 are almost all
-posterization. The original is airbrushed and the trace is flat regions. Adding
-more gold tones would close some of that gap at the cost of more shapes, but
-flat regions are what makes the art usable as geometry, so I would leave it.
+| | groups | shapes | fidelity |
+|---|---|---|---|
+| Nuggy | 9 | 1342 | IoU 0.9984, mean error 11.3/255, median 7 |
+| Miss Nuggette | 10 | 1899 | IoU 0.9833, mean error 14.9/255, median 7 |
+
+She is 5.25 units tall against his 3.50, the 1.5x that was asked for. Her build
+regrades the VHS cast out of her reference and onto Nuggy's ramp, and her blush
+survives now that it has its own layer.
+
+The medians match. Her mean and tail are worse because her reference is a
+painted VHS screengrab with film grain in it, and the grain is what the flat
+regions cannot follow. Sweeps on speck removal and simplification moved her mean
+error by less than 0.2/255 while cutting her shape count by two thirds, which is
+how we know the floor is the source and not the tracer.
 
 ## Open items
 
@@ -24,12 +32,17 @@ fine at 24fps. Tune `grown` and `lash` in `add_eyelid()`.
 
 **Feature ghosting.** Hiding an eye or the mouth leaves a faint outline behind.
 Shading immediately around those features traces as body rather than as the
-feature. Fixing it means tightening the slot boxes in `contours.py` or
+feature. Fixing it means tightening the slot boxes in `characters.py` or
 hand-assigning the leftover shapes.
 
-**No brow slot.** Brow and upper lid are one connected black mass in this
-artwork, so each eye slot owns both. Splitting them needs a cut line drawn by
-hand.
+**No brow slot.** Brow and upper lid are one connected black mass in both
+drawings, so each eye slot owns both. Splitting them needs a cut line drawn by
+hand, the same way her limb cuts are.
+
+**Miss Nuggette has no clips.** `nuggy_animate.py` is still written against
+Nuggy's slot names. Her rig takes keyframes the same way, but the clips have to
+be written for what she actually has: two pigtails to swing, a raised fist to
+slam, and no sweat drops.
 
 **Expression variants.** `legacy/nuggy_parametric.py` holds four brows, five
 mouths, three arm poses and two leg poses, all drawn in the old loose style.
@@ -38,34 +51,20 @@ in the traced style has not started. This is also what limited animation needs
 if we ever want to cut between drawings mid-clip.
 
 **Export formats.** Renders come out as a transparent PNG sequence and nothing
-else is wired up. A sprite sheet stepped with CSS is probably what the
-storefront wants. WebM keeps alpha if he needs to sit over a page.
+else is wired up. A sprite sheet stepped with CSS is probably what the storefront
+wants. WebM keeps alpha if a character has to sit over a page.
 
-**Animation coverage.** Three clips exist. Wave, land, stagger and point are all
-the same technique and roughly an hour each.
-
-**Lattice deformation.** The body can only scale right now. A lattice cage would
+**Lattice deformation.** A body can only scale right now. A lattice cage would
 let it bend and wobble, which is the next real jump in animation quality.
 
-## Next up
+## Decisions waiting on you
 
-Nuggette, the tank. The profile system is in (`profiles.py`) and Nuggy is the
-identity profile, verified to still score 0.9984 through it. Her body is blocked
-out by warping Nuggy's torso wide through the chest and pinched at the waist,
-scaling both arms 1.75x about their joints, and leaving the legs alone. See
-`preview-nuggette.png`.
-
-That body is a placeholder. The real next step is generating Nuggette art from
-the prompt in `../nuggette.md` and tracing it the way Nuggy was traced. The
-tracer will need her own colour seeds, face boxes and limb anchors, since all of
-those are measured off the specific image.
-
-The warp work is not wasted either way. It is how pose variants get made, and
-how the rest of the crew reuses one trace.
-
-Decided so far. Golden breading with pink as the accent only, which follows
-`00-style-guide.md`. A pink-breading version was built and rejected. Her prop is
-a pink bow.
+**How fierce she is.** The palette and blush now pull her back towards bubbly,
+but the pose is still a battle cry: brows down, fist up, mouth open. That works
+as her action pose. What she does not have is a resting one, and the crew shot
+in `00-style-guide.md` probably wants her calm. A second reference in a relaxed
+pose would trace through the same spec in about an hour, since her colour seeds,
+feature boxes and limb cuts are all reusable.
 
 ## Crew status
 
@@ -75,15 +74,15 @@ a pink bow.
 | 2 | Nuggesita | co-leader | art exists, not traced |
 | 3 | Chic-Li | stealth | redesign of Tender-Li, art exists, not traced |
 | 4 | Nugward | tech | not started |
-| 5 | Nuggette | tank | body blocked out, face not generated |
+| 5 | Miss Nuggette | tank | traced and rigged, no clips yet |
 
-`00-style-guide.md` still lists the old five with Tender-Li and Nugsage. It
-needs updating for Chic-Li and Nuggette, and the group-shot layout in it refers
-to characters that are changing.
+`00-style-guide.md` still lists the old five with Tender-Li and Nugsage. It needs
+updating for Chic-Li and Miss Nuggette, and the group-shot layout in it refers to
+characters that are changing.
 
 ## 3D
 
-Nothing started. The layer split is the groundwork. Each `ZORDER` layer is a
+Nothing started. The layer split is the groundwork. Each `zorder` layer is a
 separate closed 2D curve, so extruding per layer with an offset gives a relief
-version, and the per-slot cut means arms and legs are already separate objects.
-The animation is all socket transforms, so it survives the move.
+version, and the per-slot cut means limbs are already separate objects. The
+animation is all socket transforms, so it survives the move.
