@@ -60,7 +60,11 @@ LIMB_ANCHORS = {
     "arm_L": (85, 178), "arm_R": (268, 168),
     "leg_L": (105, 285), "leg_R": (238, 265),
 }
-OPEN_R = 16        # erosion radius (reference px) that opens limbs away
+OPEN_R = 22        # erosion radius (reference px) that opens limbs away
+# The bumpy crown also survives the opening in places, and those crumbs would
+# otherwise join whichever limb is nearest. The farthest real limb piece is a
+# hand at 82px from its anchor, so anything past this is not a limb.
+LIMB_MAX_DIST = 110
 
 
 # ---------------------------------------------------------------- mask utils
@@ -238,9 +242,12 @@ def slot_for(layer, pts, limb_mask, region):
 
     if region == "limb":
         cx, cy = sum(xs) / len(xs), sum(ys) / len(ys)
-        return min(LIMB_ANCHORS,
+        best = min(LIMB_ANCHORS,
                    key=lambda k: (LIMB_ANCHORS[k][0] - cx) ** 2
                                  + (LIMB_ANCHORS[k][1] - cy) ** 2)
+        ax, ay = LIMB_ANCHORS[best]
+        if (ax - cx) ** 2 + (ay - cy) ** 2 <= LIMB_MAX_DIST ** 2:
+            return best
     return "body"
 
 
@@ -322,24 +329,29 @@ def main():
         print("  %-11s loops=%-4d outers=%-4d holes=%d"
               % (name, len(loops), len(outers), len(holes)))
 
-    # Where each limb joins the torso: the middle of the cut the region split
-    # made. That is the shoulder or hip, and it is the only sensible pivot to
-    # rotate a limb about.
-    attach = limb_mask & dilate(body_core, 2)
+    # Where each limb joins the torso. Deriving this from the attachment mask
+    # does not work: the bumpy silhouette leaves opened-away crumbs all round
+    # the body, they get assigned to whichever limb is nearest, and they drag
+    # the centroid off the joint. Taking the limb's own points nearest the body
+    # centre is stable, and it lands on the cut, which is what a limb has to
+    # rotate and scale about if it is to stay attached.
+    bpts = [p for sh in shapes if sh["slot"] == "body"
+            for r in sh["rings"] for p in r]
+    bcx = sum(p[0] for p in bpts) / len(bpts)
+    bcy = sum(p[1] for p in bpts) / len(bpts)
+
     pivots = {}
     for slot in LIMB_ANCHORS:
-        ax, ay = LIMB_ANCHORS[slot]
-        ys, xs = np.nonzero(attach)
-        if len(xs) == 0:
+        pts = [p for sh in shapes if sh["slot"] == slot
+               for r in sh["rings"] for p in r]
+        if not pts:
             continue
-        rx, ry = xs / SRC, ys / SRC
-        d = (rx - ax) ** 2 + (ry - ay) ** 2
-        own = d <= np.minimum.reduce(
-            [(rx - LIMB_ANCHORS[o][0]) ** 2 + (ry - LIMB_ANCHORS[o][1]) ** 2
-             for o in LIMB_ANCHORS])
-        if own.any():
-            pivots[slot] = [float(rx[own].mean()), float(ry[own].mean())]
-    print("pivots:", {k: [round(v, 1) for v in p] for k, p in pivots.items()})
+        pts.sort(key=lambda p: (p[0] - bcx) ** 2 + (p[1] - bcy) ** 2)
+        near = pts[:max(8, len(pts) // 10)]
+        pivots[slot] = [sum(p[0] for p in near) / len(near),
+                        sum(p[1] for p in near) / len(near)]
+    print("body centre (%.0f,%.0f)  pivots: %s"
+          % (bcx, bcy, {k: [round(v) for v in p] for k, p in pivots.items()}))
 
     from collections import Counter
     print("\nby slot:", dict(Counter(s["slot"] for s in shapes)))

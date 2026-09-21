@@ -22,9 +22,12 @@ import math
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from profiles import PROFILES
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 TRACE = os.path.join(HERE, "trace", "out", "trace.json")
-BLEND_PATH = os.path.join(HERE, "nuggy.blend")
+BLEND_PATH = os.path.join(HERE, "nuggy.blend")   # overridden by --profile
 
 # Reference-image pixel -> Blender unit. CX/CY put the character's own centre
 # at the origin so sockets and the camera share one frame.
@@ -109,7 +112,7 @@ def add_empty(name, loc, parent, coll, size=0.14, kind="SPHERE"):
     return e
 
 
-def add_curve(name, rings, color, z, origin, parent, coll):
+def add_curve(name, rings, color, z, origin, parent, coll, prof=None):
     """One curve object holding every ring of one colour in one slot.
 
     Rings are drawn relative to `origin` (the slot's socket) so moving the
@@ -118,7 +121,7 @@ def add_curve(name, rings, color, z, origin, parent, coll):
     cu = bpy.data.curves.new(name, "CURVE")
     cu.dimensions = "2D"
     cu.fill_mode = "BOTH"
-    cu.materials.append(get_mat(color))
+    cu.materials.append(get_mat(prof.color(color) if prof else color))
     for ring in rings:
         sp = cu.splines.new("POLY")
         sp.points.add(len(ring) - 1)
@@ -134,7 +137,7 @@ def add_curve(name, rings, color, z, origin, parent, coll):
     return ob
 
 
-def add_eyelid(slot, group, origin, socket, coll):
+def add_eyelid(slot, group, origin, socket, coll, prof=None):
     """A skin-coloured lid that closes over one eye.
 
     Not traced -- the reference has both eyes open, so there is no closed
@@ -165,7 +168,7 @@ def add_eyelid(slot, group, origin, socket, coll):
                               ("lid", "#EBA126", -lash, 0.002)):
         ob = add_curve("%s_%s" % (slot, name),
                        [[(x, y + dy) for x, y in grown]],
-                       col, LID_Z + dz, anchor, socket, coll)
+                       col, LID_Z + dz, anchor, socket, coll, prof)
         ob.location = (anchor[0] - origin[0], anchor[1] - origin[1], LID_Z + dz)
         ob.scale = (1.0, 0.0, 1.0)           # height 0 == eye open
         made.append(ob)
@@ -195,7 +198,7 @@ def drive_hidden(objs, ctrl, prop):
 
 # --------------------------------------------------------------------- build
 
-def setup_scene(scene):
+def setup_scene(scene, ortho=4.0):
     for eng in ("BLENDER_EEVEE_NEXT", "BLENDER_EEVEE", "CYCLES"):
         try:
             scene.render.engine = eng
@@ -216,7 +219,7 @@ def setup_scene(scene):
 
     cd = bpy.data.cameras.new("NUGGY_CAM")
     cd.type = "ORTHO"
-    cd.ortho_scale = 4.0
+    cd.ortho_scale = ortho
     cam = bpy.data.objects.new("NUGGY_CAM", cd)
     cam.location = (0.0, -10.0, 0.0)
     cam.rotation_euler = (math.radians(90), 0.0, 0.0)
@@ -224,14 +227,15 @@ def setup_scene(scene):
     scene.camera = cam
 
 
-def build():
+def build(prof=None):
+    prof = prof or PROFILES["nuggy"]
     data = json.load(open(TRACE))
     shapes = data["shapes"]
     pivots = data.get("pivots", {})
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    setup_scene(scene)
+    setup_scene(scene, prof.ortho)
 
     top = new_coll("NUGGY", scene.collection)
     c_sock = new_coll("Sockets", top)
@@ -258,38 +262,53 @@ def build():
             continue
 
         # Limbs pivot where they meet the torso; everything else pivots at the
-        # middle of its own bounding box.
-        pts = [to_blender(p) for sh in group for r in sh["rings"] for p in r]
-        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
-        if slot == "body":
-            origin = (0.0, 0.0)
-        elif slot in pivots:
-            origin = to_blender(pivots[slot])
+        # middle of its own bounding box. Pixel space throughout, because the
+        # profile's warp and slot transforms are defined there.
+        px = [p for sh in group for r in sh["rings"] for p in r]
+        bx = [p[0] for p in px]
+        by = [p[1] for p in px]
+        if slot in pivots:
+            pivot = tuple(pivots[slot])
         else:
-            origin = ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
+            pivot = ((min(bx) + max(bx)) / 2, (min(by) + max(by)) / 2)
+
+        # The warp moves every pivot, so limbs and face follow the torso even
+        # though their own artwork is left alone.
+        socket_at = prof.warp(pivot)
+        warp_geom = slot == "body"
+        origin = (0.0, 0.0) if slot == "body" else to_blender(pivot)
+        socket_loc = (0.0, 0.0) if slot == "body" else to_blender(socket_at)
 
         if slot == "body":
             parent, coll = root, new_coll("Body", top)
         else:
-            parent = add_empty("SOCKET_" + slot, (origin[0], origin[1], 0.0),
-                               root, c_sock)
+            parent = add_empty("SOCKET_" + slot,
+                               (socket_loc[0], socket_loc[1], 0.0), root, c_sock)
             coll = new_coll(slot, c_feat)
 
         by_layer = {}
         for sh in group:
             by_layer.setdefault(sh["layer"], []).append(sh)
 
+        def shape(ring):
+            out = ring
+            if warp_geom:
+                out = [prof.warp(p) for p in out]
+            if slot in prof.slots:
+                out = [prof.slot_xform(slot, p, pivot) for p in out]
+            return out
+
         objs = []
         for layer, group_shapes in by_layer.items():
-            rings = [r for sh in group_shapes for r in sh["rings"]]
+            rings = [shape(r) for sh in group_shapes for r in sh["rings"]]
             objs.append(add_curve(
                 "%s_%s" % (slot, layer), rings, group_shapes[0]["color"],
                 zindex.get(layer, 0) * ZSTEP + bias_of[slot],
-                origin, parent, coll))
+                origin, parent, coll, prof))
         counts[slot] = (len(objs), sum(len(r) for sh in group for r in sh["rings"]))
 
         if slot in ("eye_L", "eye_R"):
-            objs += add_eyelid(slot, group, origin, parent, coll)
+            objs += add_eyelid(slot, group, origin, parent, coll, prof)
 
         if slot != "body":
             add_prop(ctrl, slot, SLOT_HELP[slot])
@@ -304,7 +323,10 @@ def build():
 
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    ctrl = build()
+    name = argv[argv.index("--profile") + 1] if "--profile" in argv else "nuggy"
+    prof = PROFILES[name]
+    print("profile: %s -- %s" % (prof.name, prof.notes))
+    ctrl = build(prof)
 
     if "--set" in argv:
         for pair in argv[argv.index("--set") + 1].split(","):
@@ -315,8 +337,9 @@ def main():
         ctrl.update_tag()
 
     if "--no-save" not in argv:
-        bpy.ops.wm.save_as_mainfile(filepath=BLEND_PATH)
-        print("saved", BLEND_PATH)
+        out = os.path.join(HERE, prof.blend)
+        bpy.ops.wm.save_as_mainfile(filepath=out)
+        print("saved", out)
 
     if "--render" in argv:
         bpy.context.view_layer.update()
