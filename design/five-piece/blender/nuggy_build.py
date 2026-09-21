@@ -1,17 +1,25 @@
-"""Build Nuggy as a flat 2D cutout rig in Blender, traced from the canon art.
+"""Build a character as a flat 2D cutout rig in Blender, from its trace.
 
-The artwork is not drawn by hand here. `trace/quantize.py` posterizes
-`reference/nuggy-canon.webp` into named flat colour layers and `trace/contours.py`
-turns those into polygons; this script reads the resulting `trace/out/trace.json`
-and builds the scene. Every shape is a filled 2D curve, stacked on the local Z
-axis and parented to a root empty that stands the whole thing upright, so
-numpad-1 (front view) looks straight at him.
+The artwork is not drawn by hand here. `trace/quantize.py` posterizes a
+character's reference into named flat colour layers and `trace/contours.py`
+turns those into polygons; this script reads the resulting
+`trace/out/<char>/trace.json` and builds the scene. Every shape is a filled 2D
+curve, stacked on the local Z axis and parented to a root empty that stands
+the whole thing upright, so numpad-1 (front view) looks straight at it.
 
 Features hang off socket empties: move `SOCKET_mouth` and the mouth moves,
-Mr. Potatohead style. Each socket also has a show/hide property on NUGGY_CTRL.
+Mr. Potatohead style. Each socket also has a show/hide property on the
+character's CTRL empty.
 
-    blender -b -P nuggy_build.py
-    blender -b -P nuggy_build.py -- --render out.png --set mouth=0
+`--char` picks the trace and the geometry frame (CX/CY/S, ortho, slots,
+z-order) from `characters.py`. `--profile` picks a warp/tint variant of that
+same trace from `profiles.py` and defaults to the identity profile matching
+`--char`; Nuggette, for instance, is `--char nuggy --profile nuggette` because
+she reuses Nuggy's trace rather than having her own.
+
+    blender -b -P nuggy_build.py -- --char nuggy
+    blender -b -P nuggy_build.py -- --char nuggy --profile nuggette
+    blender -b -P nuggy_build.py -- --char chicli --render out.png --set star=0
 
 Re-run it any time; it rebuilds the .blend from scratch.
 """
@@ -22,38 +30,32 @@ import math
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from profiles import PROFILES
-
 HERE = os.path.dirname(os.path.abspath(__file__))
-TRACE = os.path.join(HERE, "trace", "out", "trace.json")
-BLEND_PATH = os.path.join(HERE, "nuggy.blend")   # overridden by --profile
+sys.path.insert(0, HERE)
+from profiles import PROFILES
+from characters import CHARACTERS
+
+argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+CHAR = argv[argv.index("--char") + 1] if "--char" in argv else "nuggy"
+ch = CHARACTERS[CHAR]
+PROFILE = argv[argv.index("--profile") + 1] if "--profile" in argv else CHAR
+
+TRACE = os.path.join(ch.out_dir(), "trace.json")
+PREFIX = ch.name.upper()   # object/collection naming, e.g. NUGGY_ROOT, CHICLI_ROOT
 
 # Reference-image pixel -> Blender unit. CX/CY put the character's own centre
 # at the origin so sockets and the camera share one frame.
-CX, CY, S = 153.0, 163.5, 3.5 / 306.0
+CX, CY, S = ch.centre[0], ch.centre[1], ch.scale
 
 # Back to front. Regions are exact and disjoint, so this only decides which
 # side of a shared edge wins the quarter-pixel overlap the tracer adds.
-ZORDER = ["silhouette", "skinfill", "rim", "shade_deep", "shade", "amber", "gold_deep",
-          "gold_mid", "gold_base", "gold_light", "gold_pale", "eye_shadow",
-          "eye_white", "mouth_dk", "tongue", "iris", "pupil", "ink"]
+ZORDER = ch.zorder
 ZSTEP = 0.01
 LID_Z = len(ZORDER) * ZSTEP          # eyelids sit in front of every traced layer
 
 # Slots the rig can move, hide or replace. "body" is the static remainder.
-SLOTS = ["eye_L", "eye_R", "mouth", "sweat", "arm_L", "arm_R", "leg_L", "leg_R"]
-
-SLOT_HELP = {
-    "eye_L": "left eye, brow and lashes (0 hide, 1 show)",
-    "eye_R": "right eye, brow and lashes (0 hide, 1 show)",
-    "mouth": "mouth, teeth and tongue (0 hide, 1 show)",
-    "sweat": "sweat drops (0 hide, 1 show)",
-    "arm_L": "left arm and mitt (0 hide, 1 show)",
-    "arm_R": "right arm and fist (0 hide, 1 show)",
-    "leg_L": "left leg and foot (0 hide, 1 show)",
-    "leg_R": "right leg and foot (0 hide, 1 show)",
-}
+SLOTS = ch.slots
+SLOT_HELP = ch.slot_help
 
 
 # --------------------------------------------------------------------- utils
@@ -217,33 +219,56 @@ def setup_scene(scene, ortho=4.0):
         pass
     scene.view_settings.look = "None"
 
-    cd = bpy.data.cameras.new("NUGGY_CAM")
+    cam_name = PREFIX + "_CAM"
+    cd = bpy.data.cameras.new(cam_name)
     cd.type = "ORTHO"
     cd.ortho_scale = ortho
-    cam = bpy.data.objects.new("NUGGY_CAM", cd)
+    cam = bpy.data.objects.new(cam_name, cd)
     cam.location = (0.0, -10.0, 0.0)
     cam.rotation_euler = (math.radians(90), 0.0, 0.0)
     scene.collection.objects.link(cam)
     scene.camera = cam
 
 
+def clear_scene():
+    """Empty the current scene without reloading the .blend file.
+
+    `bpy.ops.wm.read_factory_settings()` looks tempting here (and is what a
+    throwaway `blender -b -P script.py` process would use) but it reloads the
+    whole file, which tears down anything an add-on registered against the
+    old one -- including, when this runs inside a live Blender instance
+    driven over MCP, the MCP server's own connection. Removing every object,
+    collection and orphaned data-block by hand reaches the same empty scene
+    without touching add-on state.
+    """
+    for ob in list(bpy.data.objects):
+        bpy.data.objects.remove(ob, do_unlink=True)
+    for coll in list(bpy.data.collections):
+        bpy.data.collections.remove(coll)
+    for block_coll in (bpy.data.curves, bpy.data.cameras, bpy.data.lights,
+                        bpy.data.meshes, bpy.data.materials, bpy.data.images):
+        for block in list(block_coll):
+            if block.users == 0:
+                block_coll.remove(block)
+
+
 def build(prof=None):
-    prof = prof or PROFILES["nuggy"]
+    prof = prof or PROFILES[CHAR]
     data = json.load(open(TRACE))
     shapes = data["shapes"]
     pivots = data.get("pivots", {})
 
-    bpy.ops.wm.read_factory_settings(use_empty=True)
+    clear_scene()
     scene = bpy.context.scene
     setup_scene(scene, prof.ortho)
 
-    top = new_coll("NUGGY", scene.collection)
+    top = new_coll(PREFIX, scene.collection)
     c_sock = new_coll("Sockets", top)
     c_feat = new_coll("Features", top)
 
-    root = add_empty("NUGGY_ROOT", (0, 0, 0), None, c_sock, size=0.5, kind="ARROWS")
+    root = add_empty(PREFIX + "_ROOT", (0, 0, 0), None, c_sock, size=0.5, kind="ARROWS")
     root.rotation_euler = (math.radians(90), 0.0, 0.0)
-    ctrl = add_empty("NUGGY_CTRL", (0.0, -2.15, 0.0), root, c_sock,
+    ctrl = add_empty(PREFIX + "_CTRL", (0.0, -2.15, 0.0), root, c_sock,
                      size=0.25, kind="SPHERE")
 
     by_slot = {}
@@ -322,10 +347,8 @@ def build(prof=None):
 
 
 def main():
-    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    name = argv[argv.index("--profile") + 1] if "--profile" in argv else "nuggy"
-    prof = PROFILES[name]
-    print("profile: %s -- %s" % (prof.name, prof.notes))
+    prof = PROFILES[PROFILE]
+    print("char: %s   profile: %s -- %s" % (CHAR, prof.name, prof.notes))
     ctrl = build(prof)
 
     if "--set" in argv:

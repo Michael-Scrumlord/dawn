@@ -1,70 +1,58 @@
 """Stage 2: turn the quantized layers into simplified polygons.
 
-Each colour mask is upsampled and smoothed, then its boundary is walked as
-directed pixel edges (inside kept on one side), which chains into closed loops
-and gives holes the opposite winding for free. Loops are simplified with
-Douglas-Peucker and rounded with Chaikin, then grouped into feature slots by
-region of interest so the rig can still swap eyes, brows and mouth.
+Per-character: every constant below comes from one `Character` in
+`characters.py`, picked with `--char`. Each colour mask is upsampled and
+smoothed, then its boundary is walked as directed pixel edges (inside kept on
+one side), which chains into closed loops and gives holes the opposite
+winding for free. Loops are simplified with Douglas-Peucker and rounded with
+Chaikin, then grouped into feature slots by region of interest so the rig can
+still swap eyes, a mouth, or whatever else that character has boxed.
 
-    /Applications/Blender.app/Contents/MacOS/Blender -b -P trace/contours.py
+    /Applications/Blender.app/Contents/MacOS/Blender -b -P trace/contours.py -- --char nuggy
 """
-import bpy, numpy as np, json, os, math
+import bpy, numpy as np, json, os, math, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "out")
+sys.path.insert(0, os.path.dirname(HERE))
+from characters import CHARACTERS
 
-UP = 1              # extra upsample (the source is already at SRC scale)
-SRC = 4             # scale of the label map relative to the reference image
-MIN_AREA_PX = 2.4   # drop specks smaller than this, in source pixels
-MIN_AREA_INK = 0.7  # keep fine linework: the breading detail is tiny strokes
-RDP_EPS = 1.2       # in label-map pixels
-CHAIKIN = 2
-BLUR_R = 0          # mask smoothing radius, in label-map pixels
+argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+CHAR = argv[argv.index("--char") + 1] if "--char" in argv else "nuggy"
+ch = CHARACTERS[CHAR]
+OUT = ch.out_dir()
 
-NAMES = ["ink", "gold_pale", "gold_light", "gold_base", "gold_mid", "gold_deep",
-         "amber", "shade", "shade_deep", "rim", "eye_white", "eye_shadow",
-         "iris", "pupil", "mouth_dk", "tongue"]
+UP = 1                     # extra upsample (the source is already at SRC scale)
+SRC = ch.src               # scale of the label map relative to the reference image
+MIN_AREA_PX = ch.min_area      # drop specks smaller than this, in source pixels
+MIN_AREA_INK = ch.min_area_ink  # keep fine linework: breading detail is tiny strokes
+RDP_EPS = ch.rdp_eps        # in label-map pixels
+CHAIKIN = ch.chaikin
+BLUR_R = ch.blur_r          # mask smoothing radius, in label-map pixels
 
-COLORS = {
-    "ink": "#281108", "gold_pale": "#F7E3A0", "gold_light": "#F1BA40",
-    "gold_base": "#EBA126", "gold_mid": "#DD9127", "amber": "#A96E25",
-    "shade": "#9C5B1D", "shade_deep": "#834315", "gold_deep": "#C98426",
-    "rim": "#6A5507", "skinfill": "#EBA126", "eye_white": "#FAF6D1",
-    "eye_shadow": "#D9C199", "iris": "#8A5A28", "pupil": "#3A1E0C",
-    "mouth_dk": "#4A1A18", "tongue": "#D9736E",
-}
+NAMES = ch.names
+COLORS = ch.colors          # includes the synthetic "skinfill" entry
 
-# Face slots, as boxes in source-image pixels: (x0, y0, x1, y1). A contour
-# joins the first box that contains its centroid. Brow and upper lid are one
-# connected black mass in this artwork, so each eye slot owns both.
-ROI = [
-    ("sweat",  ( 90,  85, 126, 200)),
-    ("sweat",  (216, 184, 244, 218)),
-    ("eye_L",  (118,  84, 202, 166)),
-    ("eye_R",  (198,  96, 250, 174)),
-    ("mouth",  (150, 168, 220, 226)),
-]
+# Slots as boxes in source-image pixels: (x0, y0, x1, y1). A contour joins the
+# first box that contains its centroid.
+ROI = ch.roi
 
-# Which layers each slot may claim. Without this the big gold shading regions
-# of the torso, whose centres fall near the face, get swallowed by an eye. The
-# sweat drops are the exception that needs gold_pale: the artist painted their
-# highlights in the same cream as the body's.
-FACE_LAYERS = {"ink", "eye_white", "eye_shadow", "iris", "pupil",
-               "mouth_dk", "tongue"}
-SLOT_LAYERS = {"sweat": FACE_LAYERS | {"gold_pale"}}
+# Which layers each slot may claim. Without this the big body shading regions,
+# whose centres can fall near a small feature, get swallowed by it. A slot not
+# listed here falls back to "ink" plus every ALLOW-restricted feature layer,
+# which is what a face feature (eyes, a mouth) wants; a feature built from
+# ordinary body-colour layers (an earring in gold, a star in steel) needs its
+# own entry -- see Character.slot_layers.
+FACE_LAYERS = {"ink"} | set(ch.allow)
+SLOT_LAYERS = {slot: layers for slot, layers in ch.slot_layers.items()}
 
 # Limbs are found geometrically rather than boxed: anything outside the body
 # core (the silhouette with thin parts opened away) belongs to the nearest
-# limb anchor. Boxes get ambiguous where the raised fist passes the eye.
-LIMB_ANCHORS = {
-    "arm_L": (85, 178), "arm_R": (268, 168),
-    "leg_L": (105, 285), "leg_R": (238, 265),
-}
-OPEN_R = 22        # erosion radius (reference px) that opens limbs away
-# The bumpy crown also survives the opening in places, and those crumbs would
-# otherwise join whichever limb is nearest. The farthest real limb piece is a
-# hand at 82px from its anchor, so anything past this is not a limb.
-LIMB_MAX_DIST = 110
+# limb anchor. Boxes get ambiguous where a raised fist passes the eye.
+LIMB_ANCHORS = ch.limb_anchors
+OPEN_R = ch.open_r         # erosion radius (reference px) that opens limbs away
+# The farthest real limb piece in Nuggy is a hand at 82px from its anchor;
+# past LIMB_MAX_DIST a surviving crumb of silhouette is not a limb.
+LIMB_MAX_DIST = ch.limb_max_dist
 
 
 # ---------------------------------------------------------------- mask utils

@@ -124,6 +124,10 @@ PROFILES = {
         "nuggy", "nuggy.blend",
         notes="Canon. Identity profile: no warp, no tint.",
     ),
+    "chicli": Profile(
+        "chicli", "chicli.blend", ortho=4.0,
+        notes="Stealth. Identity profile: her own trace, no warp, no tint.",
+    ),
     "nuggette": Profile(
         "nuggette", "nuggette.blend",
         warp=nuggette_warp,

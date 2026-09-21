@@ -1,74 +1,57 @@
 """Stage 1: posterize the reference into named flat colour layers.
 
-Run with Blender's Python (it has numpy; the system Python does not):
-    /Applications/Blender.app/Contents/MacOS/Blender -b -P trace/quantize.py
+Per-character: every constant below (source image, seed colours, feature
+boxes, thresholds) comes from one `Character` in `characters.py`, picked with
+`--char`. The algorithm is shared; only the measurements differ.
+
+    /Applications/Blender.app/Contents/MacOS/Blender -b -P trace/quantize.py -- --char nuggy
 
 Three things stop a naive nearest-colour match from working here.
 
-The source is only 306px wide, so the ink strokes are one to three pixels and
-classifying them at native size gives jagged, broken linework. Upsampling first
-turns the anti-aliased edges into ramps, and the class boundary then lands on
-the sub-pixel position the artist actually drew.
+The source is only a few hundred px wide, so ink strokes are one to three
+pixels and classifying them at native size gives jagged, broken linework.
+Upsampling first turns the anti-aliased edges into ramps, and the class
+boundary then lands on the sub-pixel position the artist actually drew.
 
-The eye and mouth colours are near-duplicates of the body's dark shading, so
-they are only allowed inside the boxes where those features live.
+Feature colours (eyes, a mouth, a star, an earring) are often near-duplicates
+of the body's dark shading, so each is only allowed inside the boxes where
+that feature lives (`Character.allow`).
 
 The body is airbrushed rather than cel-shaded, so posterizing it speckles; a
-mode filter restricted to the gold tones cleans that up without eating the thin
-ink lines that draw the breading.
+mode filter restricted to the non-feature tones (`Character.gold`) cleans
+that up without eating the thin ink lines that draw the breading.
 """
-import bpy, numpy as np, os
+import bpy, numpy as np, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REF = os.path.normpath(os.path.join(HERE, "..", "..", "reference", "nuggy-canon.webp"))
-OUT = os.path.join(HERE, "out")
+sys.path.insert(0, os.path.dirname(HERE))
+from characters import CHARACTERS
+
+argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+CHAR = argv[argv.index("--char") + 1] if "--char" in argv else "nuggy"
+ch = CHARACTERS[CHAR]
+
+REF = ch.reference
+OUT = ch.out_dir()
 os.makedirs(OUT, exist_ok=True)
 
-SRC = 4            # upsample factor applied before classifying
+SRC = ch.src              # upsample factor applied before classifying
 INK = 0
-INK_LUM = 0.30     # below this, a "gold" pixel is really linework
+INK_LUM = ch.ink_lum       # below this, a body-tone pixel is really linework
 
-SEEDS = [
-    ("ink",        "#281108"),
-    ("gold_pale",  "#F7E3A0"),
-    ("gold_light", "#F1BA40"),
-    ("gold_base",  "#EBA126"),
-    ("gold_mid",   "#DD9127"),
-    ("gold_deep",  "#C98426"),
-    ("amber",      "#A96E25"),
-    ("shade",      "#9C5B1D"),
-    ("shade_deep", "#834315"),
-    ("rim",        "#6A5507"),
-    ("eye_white",  "#FAF6D1"),
-    ("eye_shadow", "#D9C199"),
-    ("iris",       "#8A5A28"),
-    ("pupil",      "#3A1E0C"),
-    ("mouth_dk",   "#4A1A18"),
-    ("tongue",     "#D9736E"),
-]
-NAMES = [n for n, _ in SEEDS]
-GOLD = [NAMES.index(n) for n in
-        ("gold_pale", "gold_light", "gold_base", "gold_mid", "gold_deep",
-         "amber", "shade", "shade_deep", "rim")]
+SEEDS = ch.seeds
+NAMES = ch.names
+GOLD = list(ch.gold)       # every layer that isn't ink or a boxed feature
 
-# Boxes (x0, y0, x1, y1) in ORIGINAL source pixels, read off the reference.
-EYES = (118, 96, 252, 178)
-MOUTH = (146, 164, 224, 230)
-SWEAT = [(96, 98, 132, 196), (216, 184, 244, 218)]
+ALLOW = ch.allow
 
-ALLOW = {
-    "eye_white":  [EYES, MOUTH] + SWEAT,
-    "eye_shadow": [EYES, MOUTH],
-    "iris":       [EYES],
-    "pupil":      [EYES],
-    "mouth_dk":   [MOUTH],
-    "tongue":     [MOUTH],
-}
-
-# The rim is the dark olive the artist edged the silhouette with. It is only
-# ever an edge tone: left unfenced it eats the brow tips, where the ink fades
-# into gold through the same olive range.
-RIM_BAND = 4       # reference px inward from the silhouette edge
+# The rim is an edge-only tone in Nuggy's palette (the dark olive he's inked
+# with); characters without one just omit it from seeds and this is a no-op.
+# It is fenced out of every ROI box, or it eats fine feature linework that
+# fades into body colour through the same tone (a brow tip against the rim,
+# say).
+RIM_BAND = ch.rim_band     # reference px inward from the silhouette edge
+ROI_BOXES = [box for _, box in ch.roi]
 
 
 def hex_rgb(h):
@@ -153,8 +136,16 @@ def main():
     h, w = opaque.shape
     print("upsampled %dx%d  opaque %d" % (w, h, int(opaque.sum())))
 
-    seeds = np.stack([hex_rgb(c) for _, c in SEEDS])
-    dist = ((rgb[:, :, None, :] - seeds[None, None, :, :]) ** 2).sum(-1)
+    # Per-seed loop rather than one (h, w, n_seeds, 3) broadcast: a high-res
+    # character (Chic-Li's cutout is 3x Nuggy's width) times SRC=4 times a
+    # couple dozen seeds blows well past what a broadcast array can hold in
+    # memory, and this needs none of it -- (h, w, n_seeds) is the only shape
+    # that has to exist at once.
+    seeds = np.stack([hex_rgb(c) for _, c in SEEDS]).astype(np.float32)
+    dist = np.empty((h, w, len(SEEDS)), dtype=np.float32)
+    for i in range(len(SEEDS)):
+        d = rgb - seeds[i]
+        dist[:, :, i] = (d * d).sum(-1)
 
     yy, xx = np.mgrid[0:h, 0:w]
 
@@ -168,8 +159,9 @@ def main():
     for name, boxes in ALLOW.items():
         dist[:, :, NAMES.index(name)][~box_mask(boxes)] = np.inf
 
-    edge_band = opaque & ~erode(opaque, RIM_BAND * SRC)
-    dist[:, :, NAMES.index("rim")][~(edge_band & ~box_mask([EYES, MOUTH]))] = np.inf
+    if "rim" in NAMES:
+        edge_band = opaque & ~erode(opaque, RIM_BAND * SRC)
+        dist[:, :, NAMES.index("rim")][~(edge_band & ~box_mask(ROI_BOXES))] = np.inf
 
     labels = dist.argmin(-1).astype(np.int16)
     labels[~opaque] = -1
