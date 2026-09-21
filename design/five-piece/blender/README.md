@@ -294,13 +294,85 @@ Renders come out as a transparent PNG sequence, which is the master. From there:
 Blender writes WebM and MP4 directly (Output properties -> File Format ->
 FFmpeg Video). Say the word and I will wire up whichever you want.
 
-## Towards 3D
+## 3D
 
-The layer split is the useful part. Each `zorder` layer is already a separate
-closed 2D curve, so extruding per layer with a small offset gives a relief
-version straight away, and the per-slot cut means arms and legs are already
-their own objects rather than welded to the torso. The animation carries over
-too, since it is all socket transforms.
+`model3d.py` inflates a traced character into a mesh.
+
+```sh
+$BLENDER -b -P model3d.py -- --char nuggy
+$BLENDER -b -P model3d.py -- --char nuggy --turntable previews/tt_ --frames 36
+```
+
+![Nuggy in 3D at four angles](preview-nuggy-3d.png)
+
+![turntable](previews/nuggy-3d-turntable.gif)
+
+There is only ever one reference image, drawn face on, so there is no side or
+back view to model from. What there is, exactly, is the front: a silhouette
+measured to within 0.2% of the art and a colour for every pixel inside it. The
+script builds the roundest solid consistent with that front, as two heightfield
+sheets that meet at the silhouette, so the outline stays the traced one from
+any angle.
+
+Height has two parts. A **puff**, which is the silhouette mask blurred and run
+through a circular profile: rounded at the rim, plump in the middle, the cross
+section of a nugget. And **relief**, taken from the artwork's own luminance.
+That second one is not a trick. The breading tones are a shading ramp, so where
+the artist painted a tone darker they were drawing a crevice and where they
+painted it lighter they were drawing a bump catching the light. Reading tone
+back as height recovers the lumps they drew, in the places they drew them.
+
+Colour comes from rendering the 2D rig through the same orthographic camera and
+projecting that image down the view axis, so the front view of the model is
+pixel-identical to the 2D build. The back gets a second render with the face
+slots switched off, or it would wear a mirrored face. Depth and rolloff scale
+with the character's **smaller** dimension, because a nugget is as deep as it
+is narrow, and scaling off the larger one makes someone as wide as Miss
+Nuggette come out as deep as she is tall.
+
+| | thickness | mesh |
+|---|---|---|
+| Nuggy | 0.86 units, 25% of his height | 354k verts, 175k faces |
+| Miss Nuggette | 1.44 units, 17% of her width | 354k verts, 123k faces |
+
+### What it is honestly good for
+
+Square on and out to about 40 degrees it holds up. Past that the side takes
+over the frame, and the side is the part no reference has anything to say
+about. A front projection stretched over a turning surface smears into
+streaks, so past a threshold the material fades the artwork out to a flat
+breading tone. A plain side wall is a smaller lie than a smeared one, but it is
+still a wall.
+
+So: turntables, hero shots, parallax, a slow drift, lighting that grazes the
+relief. Not a full orbit, and not a character who turns around.
+
+Two things worth knowing if you tune it. The fade is keyed to `|N.y|` of the
+underlying form, not to the view: rotate the model and a receding shoulder
+turns to *face* the camera, so a view-dependent fade lights up exactly the band
+it is meant to suppress. And the normal it uses is baked from the puff alone,
+because taking it from the finished surface picks up every breading bump and
+the mask thrashes.
+
+The knobs are `--depth`, `--rolloff`, `--relief`, `--fade lo,hi`, `--grid` and
+`--outline`. Defaults are at the top of `model3d.py`.
+
+### The outline
+
+In 2D the ink line is traced geometry. In 3D it has to be regenerated, so the
+model carries an inverted hull: a slightly fattened copy with its normals
+flipped and front faces culled, so only the sliver past the silhouette is ever
+seen. Freestyle looks better and costs a render pass; this is free and survives
+into any engine. `--outline 0` turns it off.
+
+### If this is not enough
+
+The next step up is a sculpted model, and it needs two things this does not.
+Side and back reference art, generated the same way the front was. And hand
+sculpting, which is a person in Blender or an image-to-3D service producing a
+base mesh to clean up and retexture. The inflate build is the thing to judge
+that against: if a rounded Nuggy still reads as Nuggy here, the sculpt is worth
+commissioning, and this tells you what depth and proportion to ask for.
 
 ## `legacy/`
 

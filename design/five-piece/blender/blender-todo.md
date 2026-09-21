@@ -82,7 +82,22 @@ characters that are changing.
 
 ## 3D
 
-Nothing started. The layer split is the groundwork. Each `zorder` layer is a
-separate closed 2D curve, so extruding per layer with an offset gives a relief
-version, and the per-slot cut means limbs are already separate objects. The
-animation is all socket transforms, so it survives the move.
+`model3d.py` inflates a trace into a mesh: `nuggy-3d.blend` and
+`nuggette-3d.blend`, both built, both with the baked maps packed in. Square on
+and out to about 40 degrees they hold up. See the README for how and why.
+
+What is left on this path:
+
+**The side.** Past 40 degrees the rim takes over the frame and it is flat
+breading colour, because the front projection has nothing to say there. Three
+ways forward, in ascending cost: paint a side strip by hand and project it onto
+the rim; generate a side-view reference and blend two projections; or sculpt.
+
+**Nobody has opened these in the UI yet.** They were built and rendered
+headless. Worth a look before anything gets built on them.
+
+**No rig.** The 2D rig's sockets did not carry over; the mesh is one object per
+character. Bones replacing the sockets is the natural next step, and the limb
+cuts already say where the joints are.
+
+**Turntable GIF is 1MB.** Fine for a preview, not for a page.

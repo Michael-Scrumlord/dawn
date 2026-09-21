@@ -7,3 +7,9 @@ trace/out/*/labels.npy
 trace/out/*/quantized.png
 trace/out/*/verify.png
 __pycache__/
+
+# Baked for the 3D build and packed into the .blend; model3d.py regenerates them.
+trace/out/*/albedo-*.png
+trace/out/*/form-normal.png
+trace/out/*/facing.png
+trace/out/*/rim.png
