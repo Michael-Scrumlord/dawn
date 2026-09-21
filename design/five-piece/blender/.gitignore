@@ -2,8 +2,7 @@
 *.blend1
 
 # Trace intermediates -- regenerate with trace/quantize.py + trace/contours.py.
-# Each character gets its own trace/out/<char>/ dir; trace.json is kept in
-# each, since nuggy_build.py reads it.
+# trace.json is kept, because build.py reads it and re-tracing needs Blender.
 trace/out/*/labels.npy
 trace/out/*/meta.txt
 trace/out/*/quantized.png

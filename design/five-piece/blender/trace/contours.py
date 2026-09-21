@@ -1,12 +1,9 @@
 """Stage 2: turn the quantized layers into simplified polygons.
 
-Per-character: every constant below comes from one `Character` in
-`characters.py`, picked with `--char`. Each colour mask is upsampled and
-smoothed, then its boundary is walked as directed pixel edges (inside kept on
-one side), which chains into closed loops and gives holes the opposite
-winding for free. Loops are simplified with Douglas-Peucker and rounded with
-Chaikin, then grouped into feature slots by region of interest so the rig can
-still swap eyes, a mouth, or whatever else that character has boxed.
+Each colour mask is upsampled and smoothed, then its boundary is walked as
+directed pixel edges (inside kept on one side), which chains into closed loops
+and gives holes the opposite winding for free. Loops are simplified with
+Douglas-Peucker and rounded with Chaikin, then grouped into rig slots.
 
     /Applications/Blender.app/Contents/MacOS/Blender -b -P trace/contours.py -- --char nuggy
 """
@@ -14,73 +11,21 @@ import bpy, numpy as np, json, os, math, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
+sys.path.insert(0, HERE)
 from characters import CHARACTERS
+from raster import box_blur, dilate, erode, polygon_mask
 
-argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-CHAR = argv[argv.index("--char") + 1] if "--char" in argv else "nuggy"
-ch = CHARACTERS[CHAR]
-OUT = ch.out_dir()
+UP = 1              # extra upsample (the source is already at ch.src scale)
 
-UP = 1                     # extra upsample (the source is already at SRC scale)
-SRC = ch.src               # scale of the label map relative to the reference image
-MIN_AREA_PX = ch.min_area      # drop specks smaller than this, in source pixels
-MIN_AREA_INK = ch.min_area_ink  # keep fine linework: breading detail is tiny strokes
-RDP_EPS = ch.rdp_eps        # in label-map pixels
-CHAIKIN = ch.chaikin
-BLUR_R = ch.blur_r          # mask smoothing radius, in label-map pixels
-
-NAMES = ch.names
-COLORS = ch.colors          # includes the synthetic "skinfill" entry
-
-# Slots as boxes in source-image pixels: (x0, y0, x1, y1). A contour joins the
-# first box that contains its centroid.
-ROI = ch.roi
-
-# Which layers each slot may claim. Without this the big body shading regions,
-# whose centres can fall near a small feature, get swallowed by it. A slot not
-# listed here falls back to "ink" plus every ALLOW-restricted feature layer,
-# which is what a face feature (eyes, a mouth) wants; a feature built from
-# ordinary body-colour layers (an earring in gold, a star in steel) needs its
-# own entry -- see Character.slot_layers.
-FACE_LAYERS = {"ink"} | set(ch.allow)
-SLOT_LAYERS = {slot: layers for slot, layers in ch.slot_layers.items()}
-
-# Limbs are found geometrically rather than boxed: anything outside the body
-# core (the silhouette with thin parts opened away) belongs to the nearest
-# limb anchor. Boxes get ambiguous where a raised fist passes the eye.
-LIMB_ANCHORS = ch.limb_anchors
-OPEN_R = ch.open_r         # erosion radius (reference px) that opens limbs away
-# The farthest real limb piece in Nuggy is a hand at 82px from its anchor;
-# past LIMB_MAX_DIST a surviving crumb of silhouette is not a limb.
-LIMB_MAX_DIST = ch.limb_max_dist
+# Which layers a face slot may claim. Without this the big breading regions of
+# the torso, whose centres fall near the face, get swallowed by an eye.
+FACE_LAYERS = {"ink", "eye_white", "eye_shadow", "iris", "pupil",
+               "mouth_dk", "tongue", "bow", "bow_dark"}
 
 
 # ---------------------------------------------------------------- mask utils
 
-def box_sum(a, r=1):
-    k = 2 * r + 1
-    p = np.pad(a.astype(np.float32), r)
-    c = np.cumsum(np.cumsum(p, 0), 1)
-    c = np.pad(c, ((1, 0), (1, 0)))
-    h, w = a.shape
-    return (c[k:k + h, k:k + w] - c[0:h, k:k + w]
-            - c[k:k + h, 0:w] + c[0:h, 0:w])
-
-
-def box_blur(a, r=1):
-    return box_sum(a, r) / ((2 * r + 1) ** 2)
-
-
-def erode(m, r):
-    k = 2 * r + 1
-    return box_sum(m, r) >= k * k - 0.5
-
-
-def dilate(m, r):
-    return box_sum(m, r) > 0.5
-
-
-def upsample_smooth(mask, f=UP, grow=2):
+def upsample_smooth(mask, blur_r, f=UP, grow=2):
     """Upsample, round off the staircase, then grow by a hair.
 
     The growth matters: adjacent colour regions are traced from complementary
@@ -89,10 +34,7 @@ def upsample_smooth(mask, f=UP, grow=2):
     them well below anything visible at render size.
     """
     up = np.repeat(np.repeat(mask.astype(np.float32), f, 0), f, 1)
-    if BLUR_R:
-        up = box_blur(box_blur(up, BLUR_R), BLUR_R) > 0.5
-    else:
-        up = up > 0.5
+    up = (box_blur(box_blur(up, blur_r), blur_r) > 0.5) if blur_r else (up > 0.5)
     return dilate(up, grow) if grow else up
 
 
@@ -182,7 +124,7 @@ def rdp(pts, eps):
     return [p for p, k in zip(pts, keep) if k]
 
 
-def chaikin(pts, iters=CHAIKIN):
+def chaikin(pts, iters):
     for _ in range(iters):
         out = []
         n = len(pts)
@@ -203,87 +145,108 @@ def point_in(poly, pt):
         x0, y0 = poly[i]
         x1, y1 = poly[(i + 1) % n]
         if (y0 > y) != (y1 > y):
-            xx = x0 + (y - y0) / (y1 - y0) * (x1 - x0)
-            if xx > x:
+            if x0 + (y - y0) / (y1 - y0) * (x1 - x0) > x:
                 inside = not inside
     return inside
 
 
 # --------------------------------------------------------------------- main
 
-def slot_for(layer, pts, limb_mask, region):
+def slot_for(ch, layer, pts, region):
     """Which rig slot a traced shape belongs to.
 
     Membership is by containment, not by centre: a shape joins a face slot
     only if it fits entirely inside that slot's box, and joins a limb only if
-    nearly all of it sits outside the body core.
+    it sits outside the body core and near that limb's joint.
     """
     xs = [p[0] for p in pts]
     ys = [p[1] for p in pts]
     x0b, y0b, x1b, y1b = min(xs), min(ys), max(xs), max(ys)
 
-    for name, (x0, y0, x1, y1) in ROI:
-        if layer not in SLOT_LAYERS.get(name, FACE_LAYERS):
+    for name, (x0, y0, x1, y1) in ch.roi:
+        if layer not in ch.slot_layers.get(name, FACE_LAYERS):
             continue
         if x0b >= x0 and y0b >= y0 and x1b <= x1 and y1b <= y1:
             return name
 
-    if region == "limb":
+    if region not in ("body", "limb"):
+        return region
+    if region == "limb" and ch.limb_anchors:
         cx, cy = sum(xs) / len(xs), sum(ys) / len(ys)
-        best = min(LIMB_ANCHORS,
-                   key=lambda k: (LIMB_ANCHORS[k][0] - cx) ** 2
-                                 + (LIMB_ANCHORS[k][1] - cy) ** 2)
-        ax, ay = LIMB_ANCHORS[best]
-        if (ax - cx) ** 2 + (ay - cy) ** 2 <= LIMB_MAX_DIST ** 2:
+        best = min(ch.limb_anchors,
+                   key=lambda k: (ch.limb_anchors[k][0] - cx) ** 2
+                                 + (ch.limb_anchors[k][1] - cy) ** 2)
+        ax, ay = ch.limb_anchors[best]
+        if (ax - cx) ** 2 + (ay - cy) ** 2 <= ch.limb_max_dist ** 2:
             return best
     return "body"
 
 
 def main():
-    labels = np.load(os.path.join(OUT, "labels.npy"))
+    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    ch = CHARACTERS[argv[argv.index("--char") + 1] if "--char" in argv else "nuggy"]
+    out_dir = ch.out_dir()
+    src, names, colors = ch.src, ch.names, ch.colors
+
+    labels = np.load(os.path.join(out_dir, "labels.npy"))
     h, w = labels.shape
     opaque = labels >= 0
-    body_core = dilate(erode(opaque, OPEN_R * SRC), OPEN_R * SRC)
-    limb_mask = opaque & ~body_core
-    print("labels %dx%d (=%dx%d ref)  body core %d  limbs %d"
-          % (w, h, w // SRC, h // SRC, int(body_core.sum()), int(limb_mask.sum())))
+    print("%s: labels %dx%d (=%dx%d ref)" % (ch.name, w, h, w // src, h // src))
 
-    sil = upsample_smooth(opaque, grow=0)
+    # Two ways to split limbs off the torso.
+    #
+    # Morphological: open the silhouette and call whatever that removes a
+    # limb, then hand each piece to the nearest joint. It costs nothing to set
+    # up and works on a figure whose limbs are obviously thinner than its body.
+    #
+    # Explicit: draw the cut. Nuggette is one huge round mass with limbs as
+    # thick as an arm of the torso, so no radius separates them -- opening
+    # either leaves the arms welded on or shaves every popcorn bump off the
+    # perimeter. Where the cut goes is a rigging decision anyway, the same one
+    # you make cutting a paper puppet apart, so it is better made by hand.
+    if ch.limb_polys:
+        regions, claimed = [], np.zeros_like(opaque)
+        for slot, poly in ch.limb_polys.items():
+            m = polygon_mask(poly, w, h, src) & opaque & ~claimed
+            claimed |= m
+            regions.append((slot, m))
+            print("  cut %-6s %7d px" % (slot, int(m.sum())))
+        regions.insert(0, ("body", opaque & ~claimed))
+    else:
+        body_core = dilate(erode(opaque, ch.open_r * src), ch.open_r * src)
+        regions = [("body", body_core | ~opaque), ("limb", opaque & ~body_core)]
+        print("  body core %d  limbs %d"
+              % (int(regions[0][1].sum()), int(regions[1][1].sum())))
 
-    # A single gold region runs unbroken from the torso out into an arm, so no
-    # per-shape rule can separate them. Cut every layer along the body-core
-    # boundary first and trace the two sides independently; the grow step then
-    # makes the pieces overlap slightly so the cut leaves no seam.
-    regions = [("body", ~limb_mask), ("limb", limb_mask)]
+    sil = upsample_smooth(opaque, ch.blur_r, grow=0)
 
     shapes = []
     # silhouette gives the crisp dark rim; skinfill sits just inside it so a
     # feature switched off shows skin underneath instead of a dark hole.
-    for li, name in enumerate(["silhouette", "skinfill"] + NAMES):
+    for li, name in enumerate(["silhouette", "skinfill"] + names):
         if name == "silhouette":
             raw = opaque
         elif name == "skinfill":
-            raw = erode(opaque, 2 * SRC)
+            raw = erode(opaque, 2 * src)
         else:
             raw = labels == li - 2
-        parts = [(rn, raw & rm) for rn, rm in regions]
 
-        outers, holes = [], []
-        loops = []
-        part_of = {}
-        for rname, rmask in parts:
-            if not rmask.any():
+        outers, holes, loops, part_of = [], [], [], {}
+        for rname, rmask in regions:
+            m = raw & rmask
+            if not m.any():
                 continue
-            m = upsample_smooth(rmask, grow=0 if name == "silhouette" else 1) & sil
+            m = upsample_smooth(m, ch.blur_r,
+                                grow=0 if name == "silhouette" else 1) & sil
             for lp in trace_loops(m):
                 part_of[id(lp)] = rname
                 loops.append(lp)
         for lp in loops:
             a = signed_area(lp)
-            floor = MIN_AREA_INK if name == "ink" else MIN_AREA_PX
-            if abs(a) < floor * (UP * SRC) ** 2:
+            floor = ch.min_area_ink if name in ch.fine_layers else ch.min_area
+            if abs(a) < floor * (UP * src) ** 2:
                 continue
-            pts = chaikin(rdp(lp, RDP_EPS))
+            pts = chaikin(rdp(lp, ch.rdp_eps), ch.chaikin)
             if a > 0:
                 outers.append((abs(a), pts, part_of[id(lp)]))
             else:
@@ -301,18 +264,20 @@ def main():
                 assigned[bi].append(hp)
 
         for i, (area, op, rname) in enumerate(outers):
-            ref_pts = [(p[0] / (UP * SRC), p[1] / (UP * SRC)) for p in op]
-            cx = sum(p[0] for p in ref_pts) / len(ref_pts)
-            cy = sum(p[1] for p in ref_pts) / len(ref_pts)
+            def ref(p):
+                return [p[0] / (UP * src), p[1] / (UP * src)]
+            rings = [[ref(p) for p in op]] + [[ref(p) for p in hp]
+                                              for hp in assigned[i]]
+            cx = sum(p[0] for p in rings[0]) / len(rings[0])
+            cy = sum(p[1] for p in rings[0]) / len(rings[0])
             shapes.append({
                 "layer": name,
-                "color": COLORS.get(name, "#281108"),
-                "slot": slot_for(name, ref_pts, limb_mask, rname),
-                "area": area / (UP * SRC) ** 2,
+                "color": colors.get(name, colors["ink"]),
+                "slot": slot_for(ch, name, rings[0], rname),
+                "region": rname,
+                "area": area / (UP * src) ** 2,
                 "centroid": [cx, cy],
-                "rings": [[[p[0] / (UP * SRC), p[1] / (UP * SRC)] for p in op]]
-                         + [[[p[0] / (UP * SRC), p[1] / (UP * SRC)] for p in hp]
-                            for hp in assigned[i]],
+                "rings": rings,
             })
         print("  %-11s loops=%-4d outers=%-4d holes=%d"
               % (name, len(loops), len(outers), len(holes)))
@@ -328,8 +293,10 @@ def main():
     bcx = sum(p[0] for p in bpts) / len(bpts)
     bcy = sum(p[1] for p in bpts) / len(bpts)
 
-    pivots = {}
-    for slot in LIMB_ANCHORS:
+    pivots = {k: list(v) for k, v in ch.pivots.items()}
+    for slot in (ch.limb_polys or ch.limb_anchors):
+        if slot in pivots:
+            continue
         pts = [p for sh in shapes if sh["slot"] == slot
                for r in sh["rings"] for p in r]
         if not pts:
@@ -346,8 +313,8 @@ def main():
     print("total shapes:", len(shapes),
           " total points:", sum(len(r) for s in shapes for r in s["rings"]))
 
-    with open(os.path.join(OUT, "trace.json"), "w") as f:
-        json.dump({"size": [w // SRC, h // SRC], "pivots": pivots,
+    with open(os.path.join(out_dir, "trace.json"), "w") as f:
+        json.dump({"size": [w // src, h // src], "pivots": pivots,
                    "shapes": shapes}, f)
     print("wrote trace.json")
 

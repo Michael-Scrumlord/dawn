@@ -1,19 +1,23 @@
-"""Character profiles.
+"""Pose and palette variants built on top of a traced character.
 
-Every nugget in the crew is the same traced artwork put through a different
-profile. A profile can warp the torso, transform a limb about its own pivot,
-and re-tint the palette. Nuggy is the identity profile, so building him through
-this path gives byte-identical geometry to building him directly.
+A profile takes one character's trace and warps it: the torso through a
+free-form function, each slot through a transform about its own pivot, and the
+palette through a recolour. The identity profile gives geometry identical to
+building the character directly, which is what keeps this honest.
 
-Only the body slot is warped. Limbs and face keep their drawn shape and simply
-follow their pivot to wherever the warp moved it, which is what lets Nuggette
-have Nuggy's legs on a completely different torso.
+Only the body slot is warped. Limbs and face keep their drawn shape and follow
+their pivot to wherever the warp moved it, so a limb stays attached to a torso
+that has changed shape underneath it.
+
+This started as the way to make the whole crew out of Nuggy's one trace. It is
+not that any more -- each character gets traced from their own art, which is
+far better -- so what it is for now is pose variants of a character who has
+already been traced, and palette experiments.
 """
 
 import colorsys
 
-# Body slot extents in reference pixels, measured off the trace.
-BODY_TOP, BODY_BOT, BODY_CX = 12.0, 278.0, 151.5
+DEG = 1.0
 
 
 def smoothstep(u):
@@ -42,43 +46,41 @@ def rgb_to_hex(rgb):
     return "#%02X%02X%02X" % tuple(max(0, min(255, round(c * 255))) for c in rgb)
 
 
-def tint_breading(hexcol, dh, ds=1.0, dv=1.0):
-    """Shift a breading tone's hue, leaving ink, whites and the tongue alone.
-
-    No profile uses this right now. Nuggette was tried with pink breading and
-    rejected: the style guide keeps every nugget in the golden family with one
-    accent colour, and once one leaves, the crew stops reading as a set. Kept
-    because the toastier and paler crew members will want it.
-
-    The test is on the source colour rather than a hand-written map, so new
-    tones added to the tracer get tinted too instead of silently staying gold.
-    """
+def regrade(hexcol, dh=0.0, ds=1.0, dv=1.0, gamma=1.0, toward=None, pull=0.0):
+    """Shift one colour in HSV. `toward` pulls the hue to a target degree."""
     r, g, b = hex_to_rgb(hexcol)
     h, s, v = colorsys.rgb_to_hsv(r, g, b)
-    if not (0.04 <= h <= 0.18 and s >= 0.30):
-        return hexcol
+    if toward is not None:
+        h += (toward / 360.0 - h) * pull
     h = (h + dh) % 1.0
     s = max(0.0, min(1.0, s * ds))
-    v = max(0.0, min(1.0, v * dv))
+    v = max(0.0, min(1.0, (v ** gamma) * dv))
     return rgb_to_hex(colorsys.hsv_to_rgb(h, s, v))
 
 
 class Profile:
-    def __init__(self, name, blend, warp=None, slots=None, palette=None,
-                 ortho=4.0, notes=""):
+    def __init__(self, name, character, blend=None, warp=None, slots=None,
+                 palette=None, ortho=None, notes=""):
         self.name = name
+        self.character = character
         self.blend = blend
-        self._warp = warp
+        self.warp_fn = warp
         self.slots = slots or {}
-        self._palette = palette
-        self.ortho = ortho          # camera width; she is wider than Nuggy
+        self.palette = palette
+        self.ortho = ortho
         self.notes = notes
 
     def warp(self, pt):
-        return self._warp(pt[0], pt[1]) if self._warp else (pt[0], pt[1])
+        return self.warp_fn(pt[0], pt[1]) if self.warp_fn else (pt[0], pt[1])
 
-    def color(self, hexcol):
-        return self._palette(hexcol) if self._palette else hexcol
+    def color(self, hexcol, ch):
+        """A profile with no palette of its own defers to the character's.
+        `palette="identity"` forces the raw traced colours instead."""
+        if self.palette == "identity":
+            return hexcol
+        if self.palette:
+            return self.palette(hexcol)
+        return ch.color(hexcol)
 
     def slot_xform(self, slot, pt, pivot):
         """Scale and rotate a point about its slot's pivot, in pixel space."""
@@ -96,49 +98,14 @@ class Profile:
         return (pivot[0] + px + dx, pivot[1] + py + dy)
 
 
-# --------------------------------------------------------------- nuggette
-
-# Horizontal scale by height. Wide through the chest, pinched at the waist.
-# She is the crew's deformed-huge-nugget, so the chest goes well past anything
-# a real nugget would do.
-NUGGETTE_WIDTH = [
-    (0.00, 1.00),   # crown
-    (0.10, 1.10),
-    (0.28, 1.34),   # shoulders and chest, widest
-    (0.46, 1.27),
-    (0.62, 1.05),
-    (0.80, 0.86),   # waist
-    (1.00, 0.90),
-]
-
-
-def nuggette_warp(x, y):
-    t = (y - BODY_TOP) / (BODY_BOT - BODY_TOP)
-    sx = curve(NUGGETTE_WIDTH, t)
-    ny = BODY_TOP + (y - BODY_TOP) * 1.04          # a touch taller overall
-    return BODY_CX + (x - BODY_CX) * sx, ny
-
+# ------------------------------------------------------------------- variants
 
 PROFILES = {
-    "nuggy": Profile(
-        "nuggy", "nuggy.blend",
-        notes="Canon. Identity profile: no warp, no tint.",
-    ),
-    "chicli": Profile(
-        "chicli", "chicli.blend", ortho=4.0,
-        notes="Stealth. Identity profile: her own trace, no warp, no tint.",
-    ),
-    "nuggette": Profile(
-        "nuggette", "nuggette.blend",
-        warp=nuggette_warp,
-        slots={
-            # slot: (scale_x, scale_y, rotation_deg, dx, dy) about the pivot.
-            # Rotation is in pixel space, where y points down, so a positive
-            # angle turns clockwise on screen.
-            "arm_L": (1.75, 1.75, 0, 0, 0),
-            "arm_R": (1.75, 1.75, 0, 0, 0),
-        },
-        ortho=5.0,
-        notes="Tank. Nuggy's legs and face on a bodybuilder torso, huge arms.",
+    "nuggette-flat": Profile(
+        "nuggette-flat", "nuggette", blend="nuggette-flat.blend",
+        palette="identity",
+        notes="Miss Nuggette in the colours actually measured off her "
+              "reference, VHS grade and all. This is the build her fidelity "
+              "numbers are measured on.",
     ),
 }

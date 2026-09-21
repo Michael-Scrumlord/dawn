@@ -3873,6 +3873,8 @@ details-disclosure > details {
   --nug-surface: #F7F1FB;
   --nug-border: rgba(44, 24, 49, 0.12);
   --nug-border-strong: rgba(44, 24, 49, 0.24);
+  --nug-line: 0.2rem;
+  --nug-line-strong: 0.3rem;
   --nug-radius-control: 1.2rem;
   --nug-radius-label: 0.8rem;
 }
@@ -3887,7 +3889,7 @@ h3,
 }
 
 .utility-bar {
-  border-bottom: 1px solid var(--nug-border);
+  border-bottom: 0;
 }
 
 .announcement-bar {
@@ -3902,7 +3904,8 @@ h3,
 }
 
 .header-wrapper {
-  border-bottom: 1px solid rgba(45, 26, 14, 0.08);
+  border-top: var(--nug-line-strong) solid var(--nug-dark);
+  border-bottom: var(--nug-line-strong) solid var(--nug-dark);
 }
 
 .nug-header-mascot {
@@ -3921,7 +3924,7 @@ h3,
     radial-gradient(circle at 78% 18%, rgba(185, 154, 219, 0.62) 0 8rem, transparent 8.2rem),
     radial-gradient(circle at 91% 78%, rgba(121, 207, 205, 0.55) 0 12rem, transparent 12.2rem),
     linear-gradient(112deg, #F8D45F 0%, #F4C84A 48%, #F6A56F 100%);
-  border-bottom: 0.2rem solid var(--nug-dark);
+  border-bottom: var(--nug-line-strong) solid var(--nug-dark);
   position: relative;
 }
 
@@ -4003,7 +4006,7 @@ h3,
   margin: 0 0 2rem;
   padding: 0.5rem 1.4rem;
   background: var(--nug-crust);
-  border: 1px solid rgba(44, 24, 49, 0.2);
+  border: var(--nug-line) solid rgba(44, 24, 49, 0.75);
   border-radius: var(--nug-radius-label);
   color: #2C1831;
   font-size: 1.2rem;
@@ -4048,7 +4051,8 @@ h3,
 .nug-hero-actions .button {
   min-height: 5.2rem;
   padding: 0 2.8rem;
-  border-radius: var(--nug-radius-control);
+  overflow: hidden;
+  border-radius: 1.4rem;
   font-weight: 700;
   font-size: 1.45rem;
   letter-spacing: 0.01em;
@@ -4056,16 +4060,19 @@ h3,
 }
 
 .nug-hero-actions .button::before,
-.nug-hero-actions .button::after,
 .quick-add__submit::before,
 .quick-add__submit::after {
   border-radius: inherit;
 }
 
+.nug-hero-actions .button::after {
+  content: none;
+}
+
 .nug-hero-actions .button--primary {
   background: var(--nug-plum);
   color: #FFF9F1;
-  border: 1px solid var(--nug-plum);
+  border: var(--nug-line) solid var(--nug-dark);
   box-shadow: 0 4px 14px rgba(106, 61, 115, 0.24);
 }
 
@@ -4077,14 +4084,14 @@ h3,
 .nug-hero-actions .button--secondary {
   background: #FFF9F1;
   color: #116662;
-  border: 1px solid rgba(23, 126, 121, 0.45);
-  box-shadow: 0 2px 8px rgba(45, 26, 14, 0.06);
+  border: var(--nug-line) solid var(--nug-dark);
+  box-shadow: 0.4rem 0.4rem 0 rgba(23, 126, 121, 0.3);
 }
 
 .nug-hero-actions .button--secondary:hover {
   background: #D9F1EC;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(45, 26, 14, 0.12);
+  box-shadow: 0.5rem 0.6rem 0 rgba(23, 126, 121, 0.36);
   border-color: var(--nug-teal);
 }
 
@@ -4102,7 +4109,7 @@ h3,
   padding: 3rem 3.2rem 2.6rem;
   background: linear-gradient(145deg, #FFF9F1 0%, #F3EAF8 100%);
   border-radius: 2rem;
-  border: 0.2rem solid var(--nug-plum);
+  border: var(--nug-line-strong) solid var(--nug-plum);
   box-shadow: 1.2rem 1.2rem 0 rgba(106, 61, 115, 0.16), 0 16px 36px -4px rgba(44, 24, 49, 0.18);
   text-align: center;
 }
@@ -4130,7 +4137,7 @@ h3,
   display: inline-block;
   padding: 0.4rem 1.2rem;
   background: var(--nug-teal);
-  border: 1px solid var(--nug-teal);
+  border: var(--nug-line) solid var(--nug-dark);
   border-radius: var(--nug-radius-label);
   color: #FFFFFF;
   font-size: 1.15rem;
@@ -4170,7 +4177,7 @@ h3,
 
 .nug-departments {
   background: #FFF9F1;
-  border-bottom: 1px solid var(--nug-border);
+  border-bottom: var(--nug-line-strong) solid var(--nug-dark);
 }
 
 .nug-departments__inner {
@@ -4198,70 +4205,70 @@ h3,
 .nug-department {
   flex: 0 0 auto;
   padding: 0.8rem 1.6rem;
-  border: 1px solid rgba(45, 26, 14, 0.14);
-  border-radius: var(--nug-radius-label);
-  background: #FFFFFF;
-  color: var(--nug-dark);
+  border-width: var(--nug-line);
+  border-style: solid;
+  border-color: var(--nug-dark);
+  border-radius: 0.9rem;
+  color: var(--department-ink, #FFFFFF);
   font-size: 1.35rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   text-decoration: none;
-  transition: all 0.2s ease;
+  box-shadow: 0 0.3rem 0 rgba(44, 24, 49, 0.34);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
 .nug-department:hover,
 .nug-department:focus-visible {
   background: var(--department-color, var(--nug-plum));
-  border-color: var(--department-color, var(--nug-plum));
-  color: #FFFFFF;
-  transform: translateY(-1px);
+  border-color: var(--nug-dark);
+  color: var(--department-ink, #FFFFFF);
+  filter: saturate(1.12) brightness(1.04);
+  transform: translateY(-0.2rem);
+  box-shadow: 0 0.5rem 0 rgba(44, 24, 49, 0.38);
 }
 
 .nug-department.is-active {
   background: var(--department-color, var(--nug-plum));
-  border-color: var(--department-color, var(--nug-plum));
-  color: #FFFFFF;
+  border-color: var(--nug-dark);
+  color: var(--department-ink, #FFFFFF);
 }
 
 .nug-department:nth-child(1) {
   --department-color: var(--nug-plum);
-  background: #F3EAF8;
-  border-color: #CDB9DB;
+  background: var(--department-color);
 }
 
 .nug-department:nth-child(2) {
   --department-color: var(--nug-teal);
-  background: #D9F1EC;
-  border-color: #A8D9D1;
+  background: var(--department-color);
 }
 
 .nug-department:nth-child(3) {
   --department-color: #9B3F67;
-  background: #F8E2EA;
-  border-color: #E8B7C8;
+  background: var(--department-color);
 }
 
 .nug-department:nth-child(4) {
   --department-color: var(--nug-blue);
-  background: #E7ECFA;
-  border-color: #BAC8EA;
+  background: var(--department-color);
 }
 
 .nug-department:nth-child(5) {
-  --department-color: #B94E3D;
-  background: #FCE5DE;
-  border-color: #EFBCAE;
+  --department-color: var(--nug-crust);
+  --department-ink: var(--nug-dark);
+  background: var(--department-color);
 }
 
 .nug-department:nth-child(6) {
-  --department-color: #9A5A00;
-  background: #FFF0C7;
-  border-color: #EFD489;
+  --department-color: var(--nug-yellow);
+  --department-ink: var(--nug-dark);
+  background: var(--department-color);
 }
 
 .nug-department:nth-child(7) {
   --department-color: #7352A3;
-  background: #EEE6FA;
-  border-color: #D2C0EB;
+  background: var(--department-color);
 }
 
 .nug-department:nth-child(1):hover,
@@ -4286,8 +4293,8 @@ h3,
 .nug-department:nth-child(7):focus-visible,
 .nug-department:nth-child(7).is-active {
   background: var(--department-color);
-  border-color: var(--department-color);
-  color: #FFFFFF;
+  border-color: var(--nug-dark);
+  color: var(--department-ink, #FFFFFF);
 }
 
 .collection {
@@ -4318,7 +4325,7 @@ h3,
 }
 
 .card {
-  border: 1px solid var(--nug-card-accent, rgba(44, 24, 49, 0.12));
+  border: var(--nug-line) solid var(--nug-card-accent, rgba(44, 24, 49, 0.3));
   border-radius: 1.4rem;
   background: #FFFFFF;
   box-shadow: 0 2px 8px -2px rgba(45, 26, 14, 0.05);
@@ -4335,7 +4342,7 @@ h3,
 .nug-card-placeholder {
   min-height: 22rem;
   background: var(--nug-card-tint, #FFF4CF);
-  border-bottom: 1px solid rgba(45, 26, 14, 0.08);
+  border-bottom: var(--nug-line) solid var(--nug-card-accent, rgba(44, 24, 49, 0.3));
   position: relative;
   display: flex;
   align-items: center;
@@ -4421,7 +4428,7 @@ h3,
 
 .quick-add__submit {
   min-height: 4.4rem;
-  border: 1px solid rgba(45, 26, 14, 0.18);
+  border: var(--nug-line) solid var(--nug-dark);
   border-radius: var(--nug-radius-control);
   background: #FFFDF7;
   color: var(--nug-dark);
