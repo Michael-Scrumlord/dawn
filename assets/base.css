@@ -3791,7 +3791,7 @@ details-disclosure > details {
   color: #3E2614;
   background: rgba(255, 255, 255, 0.95);
   padding: 0.45rem 1.05rem;
-  border-radius: 9999px;
+  border-radius: var(--nug-radius-label);
   border: 1.5px solid rgba(228, 161, 58, 0.4);
   box-shadow: 0 2px 8px rgba(62, 38, 20, 0.08);
   white-space: nowrap;
@@ -3825,7 +3825,7 @@ details-disclosure > details {
 
 /* Quick Add Button Polish */
 .quick-add__submit {
-  border-radius: 1.2rem !important;
+  border-radius: var(--nug-radius-control) !important;
   font-weight: 800 !important;
   font-size: 1.08rem !important;
   letter-spacing: 0.04em !important;
@@ -3869,6 +3869,8 @@ details-disclosure > details {
   --nug-surface: #FFF9EE;
   --nug-border: rgba(45, 26, 14, 0.12);
   --nug-border-strong: rgba(45, 26, 14, 0.24);
+  --nug-radius-control: 1.2rem;
+  --nug-radius-label: 0.8rem;
 }
 
 h1,
@@ -3933,7 +3935,7 @@ h3,
   place-items: center;
   width: 3.6rem;
   height: 2.4rem;
-  border-radius: 9999px;
+  border-radius: var(--nug-radius-label);
   transition: background-color 0.2s ease;
 }
 
@@ -3982,7 +3984,7 @@ h3,
   padding: 0.5rem 1.4rem;
   background: rgba(45, 26, 14, 0.08);
   border: 1px solid rgba(45, 26, 14, 0.14);
-  border-radius: 9999px;
+  border-radius: var(--nug-radius-label);
   color: var(--nug-dark);
   font-size: 1.2rem;
   font-weight: 700;
@@ -4022,11 +4024,18 @@ h3,
 .nug-hero-actions .button {
   min-height: 5.2rem;
   padding: 0 2.8rem;
-  border-radius: 1.2rem;
+  border-radius: var(--nug-radius-control);
   font-weight: 700;
   font-size: 1.45rem;
   letter-spacing: 0.01em;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nug-hero-actions .button::before,
+.nug-hero-actions .button::after,
+.quick-add__submit::before,
+.quick-add__submit::after {
+  border-radius: inherit;
 }
 
 .nug-hero-actions .button--primary {
@@ -4079,7 +4088,7 @@ h3,
   padding: 0.4rem 1.2rem;
   background: #FFF2CE;
   border: 1px solid rgba(45, 26, 14, 0.16);
-  border-radius: 9999px;
+  border-radius: var(--nug-radius-label);
   color: var(--nug-dark);
   font-size: 1.15rem;
   font-weight: 700;
@@ -4147,7 +4156,7 @@ h3,
   flex: 0 0 auto;
   padding: 0.8rem 1.6rem;
   border: 1px solid rgba(45, 26, 14, 0.14);
-  border-radius: 0.8rem;
+  border-radius: var(--nug-radius-label);
   background: #FFFFFF;
   color: var(--nug-dark);
   font-size: 1.35rem;
@@ -4248,7 +4257,7 @@ h3,
 .nug-placeholder-subtitle {
   display: inline-block;
   padding: 0.4rem 1rem;
-  border-radius: 9999px;
+  border-radius: var(--nug-radius-label);
   background: rgba(45, 26, 14, 0.06);
   color: rgba(45, 26, 14, 0.72);
   font-size: 1.15rem;
@@ -4276,7 +4285,7 @@ h3,
 .quick-add__submit {
   min-height: 4.4rem;
   border: 1px solid rgba(45, 26, 14, 0.18);
-  border-radius: 1.2rem;
+  border-radius: var(--nug-radius-control);
   background: #FFFDF7;
   color: var(--nug-dark);
   font-size: 1.3rem;
