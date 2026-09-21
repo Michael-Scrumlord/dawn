@@ -3825,7 +3825,7 @@ details-disclosure > details {
 
 /* Quick Add Button Polish */
 .quick-add__submit {
-  border-radius: 9999px !important;
+  border-radius: 1.2rem !important;
   font-weight: 800 !important;
   font-size: 1.08rem !important;
   letter-spacing: 0.04em !important;
@@ -4022,7 +4022,7 @@ h3,
 .nug-hero-actions .button {
   min-height: 5.2rem;
   padding: 0 2.8rem;
-  border-radius: 9999px;
+  border-radius: 1.2rem;
   font-weight: 700;
   font-size: 1.45rem;
   letter-spacing: 0.01em;
@@ -4147,7 +4147,7 @@ h3,
   flex: 0 0 auto;
   padding: 0.8rem 1.6rem;
   border: 1px solid rgba(45, 26, 14, 0.14);
-  border-radius: 9999px;
+  border-radius: 0.8rem;
   background: #FFFFFF;
   color: var(--nug-dark);
   font-size: 1.35rem;
@@ -4276,7 +4276,7 @@ h3,
 .quick-add__submit {
   min-height: 4.4rem;
   border: 1px solid rgba(45, 26, 14, 0.18);
-  border-radius: 9999px;
+  border-radius: 1.2rem;
   background: #FFFDF7;
   color: var(--nug-dark);
   font-size: 1.3rem;
