@@ -39,4 +39,6 @@ Attach `reference/nuggy-canon.webp`. Paste the master style block from `00-style
 ## Open questions
 
 - Pronouns (no default assumed in these files).
+ANSWER: She/Her
 - Keep the chip gag, or drop it and let the bandana carry the design?
+ANSWER: keep the chip gag. Change the material to gold, more like an earring. Position it higher so it looks more like an earring. For alternate poses, ensure there is one earring on each ear. 

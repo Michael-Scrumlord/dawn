@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| **Role** | Fighter, the muscle |
+| **Role** | Fighter, the rogue or the archer |
 | **Energy** | Reserved but with a bite. Fights infrequently, and fights with her hands and words. |
 | **Pronouns** | She/her |
 | **Accent color** | Ivory + black |
-| **Silhouette** | Widest and lowest of the crew, chicken-tender inspired: a broad, slightly elongated oval |
+| **Silhouette** | Most agile and deadly of the crew, chicken-tender inspired: a slim, slightly elongated oval |
 | **Breading tone** | Darkest: extra crispy, mahogany-gold |
-| **Signature prop** | White hand wraps with a black stripe on both fists |
+| **Signature prop** | Ranger cloak with poison shuriken on the side |
 | **Status** | Concept |
 
 ## Personality
@@ -18,11 +18,11 @@ Says little, and every word lands. Tender-Li watches the fight, waits, and steps
 ## Design notes
 
 - **Contrast with Nuggy:** Nuggy is all noise and forward motion. Tender-Li is planted, low, and silent, with a flat stare.
-- **Body:** the chunkiest nugget. Broad and low, with the thickest noodle arms in the crew. Short and beefy, but still noodle-shaped with mitten hands, so she stays in style.
+- **Body:** the slimmest and most agile nugget, toned like a python. Covert and menacing with aerodynamics, with the most formidable arms in the crew. tall and agile, so she stays in style.
 - **Wraps:** white hand wraps with a black stripe on both fists, running up the wrists.
 - **Face:** half-lidded, steady eyes. Flat closed mouth, with one tiny fang peeking over the lip. That's the bite.
 - **No sweat drops.** Nothing bothers her.
-- **Pose:** wide stance, weight low, fists up at guard, eyes dead on the viewer.
+- **Pose:** menacing stance, weight low, fists up at guard, eyes dead on the viewer.
 
 ## Image prompt
 
