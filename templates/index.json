@@ -24,6 +24,17 @@
         "subheading": "Explore Studio Disciplines"
       }
     },
+    "dazos_coming_soon": {
+      "type": "coming-soon-software",
+      "settings": {
+        "eyebrow": "Software Lab",
+        "title": "DazOS Dashboard",
+        "description": "A modular personal dashboard for food, media, projects, and financial planning.",
+        "status": "Coming Soon",
+        "padding_top": 48,
+        "padding_bottom": 48
+      }
+    },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
@@ -56,6 +67,7 @@
   "order": [
     "nug_hero",
     "category_bar",
+    "dazos_coming_soon",
     "featured_collection"
   ]
 }

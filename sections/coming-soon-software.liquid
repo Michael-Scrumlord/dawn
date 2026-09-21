@@ -1,0 +1,194 @@
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<section class="dazos-teaser section-{{ section.id }}-padding" aria-labelledby="DazOSTitle-{{ section.id }}">
+  <div class="page-width">
+    <article class="dazos-teaser__card">
+      <div class="dazos-teaser__media">
+        <img
+          src="{{ 'dazos-coming-soon.webp' | asset_url }}"
+          alt="Nuggy operating a colorful modular dashboard"
+          width="900"
+          height="900"
+          loading="lazy"
+        >
+      </div>
+      <div class="dazos-teaser__content">
+        <p class="dazos-teaser__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        <h2 id="DazOSTitle-{{ section.id }}">{{ section.settings.title | escape }}</h2>
+        <p class="dazos-teaser__description">{{ section.settings.description | escape }}</p>
+        <span class="dazos-teaser__status" aria-label="Availability: {{ section.settings.status | escape }}">
+          {{ section.settings.status | escape }}
+        </span>
+      </div>
+    </article>
+  </div>
+</section>
+
+{% stylesheet %}
+  .dazos-teaser {
+    background: linear-gradient(120deg, #e3f4f2 0%, #f5effa 52%, #fff1dc 100%);
+    border-bottom: var(--nug-line-strong) solid var(--nug-dark);
+  }
+
+  .dazos-teaser__card {
+    display: grid;
+    grid-template-columns: minmax(22rem, 34rem) 1fr;
+    overflow: hidden;
+    background: #fffdf7;
+    border: var(--nug-line-strong) solid var(--nug-dark);
+    border-radius: 2rem;
+    box-shadow: 0.8rem 0.8rem 0 var(--nug-teal);
+  }
+
+  .dazos-teaser__media {
+    min-height: 28rem;
+    border-right: var(--nug-line-strong) solid var(--nug-dark);
+  }
+
+  .dazos-teaser__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .dazos-teaser__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: clamp(3rem, 6vw, 6rem);
+  }
+
+  .dazos-teaser__eyebrow {
+    margin: 0 0 1rem;
+    color: var(--nug-teal);
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .dazos-teaser__content h2 {
+    margin: 0;
+    color: var(--nug-dark);
+    font-size: clamp(3.4rem, 6vw, 5.4rem);
+    line-height: 1;
+  }
+
+  .dazos-teaser__description {
+    max-width: 58rem;
+    margin: 1.8rem 0 2.4rem;
+    color: rgba(44, 24, 49, 0.78);
+    font-size: 1.7rem;
+    line-height: 1.55;
+  }
+
+  .dazos-teaser__status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 4.4rem;
+    padding: 0.8rem 1.6rem;
+    color: var(--nug-dark);
+    background: var(--nug-yellow);
+    border: var(--nug-line-strong) solid var(--nug-dark);
+    border-radius: var(--nug-radius-control);
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    box-shadow: 0.35rem 0.35rem 0 var(--nug-plum);
+  }
+
+  @media screen and (max-width: 749px) {
+    .dazos-teaser__card {
+      grid-template-columns: 1fr;
+      box-shadow: 0.5rem 0.5rem 0 var(--nug-teal);
+    }
+
+    .dazos-teaser__media {
+      min-height: 0;
+      aspect-ratio: 16 / 11;
+      border-right: 0;
+      border-bottom: var(--nug-line-strong) solid var(--nug-dark);
+    }
+
+    .dazos-teaser__content {
+      padding: 3rem 2.4rem 3.4rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Coming soon software",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Software Lab"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "DazOS Dashboard"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "A modular personal dashboard for food, media, projects, and financial planning."
+    },
+    {
+      "type": "text",
+      "id": "status",
+      "label": "Status",
+      "default": "Coming Soon"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 48
+    }
+  ],
+  "presets": [
+    {
+      "name": "Coming soon software"
+    }
+  ]
+}
+{% endschema %}

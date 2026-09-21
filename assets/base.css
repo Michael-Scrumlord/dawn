@@ -3908,6 +3908,31 @@ h3,
   border-bottom: var(--nug-line-strong) solid var(--nug-dark);
 }
 
+.header__icons .header__icon,
+.header__icons .header__icon .svg-wrapper {
+  width: 4.8rem;
+  height: 4.8rem;
+}
+
+.header__icons .header__icon:not(.header__icon--cart) .icon {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.header__icons .header__icon--cart .icon {
+  width: 4.8rem;
+  height: 4.8rem;
+}
+
+.header__icons .header__icon .icon path {
+  stroke: currentColor;
+  stroke-width: 1.2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  vector-effect: non-scaling-stroke;
+}
+
 .nug-header-mascot {
   filter: none;
   transition: transform 0.25s ease;
