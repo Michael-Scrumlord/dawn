@@ -52,8 +52,16 @@ def main():
     opaque = upscale(a0, src) > 0.5
     h, w = opaque.shape
 
-    seeds = np.stack([hex_rgb(c) for _, c in ch.seeds])
-    dist = ((rgb[:, :, None, :] - seeds[None, None, :, :]) ** 2).sum(-1)
+    # Per-seed loop rather than one (h, w, n_seeds, 3) broadcast: a high-res
+    # character (a full-scene cutout, several times Nuggy's width) times a 4x
+    # upsample times a couple dozen seeds blows well past what a broadcast
+    # array can hold in memory, and this needs none of it -- (h, w, n_seeds)
+    # is the only shape that has to exist at once.
+    seeds = np.stack([hex_rgb(c) for _, c in ch.seeds]).astype(np.float32)
+    dist = np.empty((h, w, len(ch.seeds)), dtype=np.float32)
+    for i in range(len(ch.seeds)):
+        d = rgb - seeds[i]
+        dist[:, :, i] = (d * d).sum(-1)
 
     yy, xx = np.mgrid[0:h, 0:w]
 

@@ -351,4 +351,108 @@ NUGGETTE = Character(
 )
 
 
-CHARACTERS = {c.name: c for c in (NUGGY, NUGGETTE)}
+# --------------------------------------------------------------------- chicli
+
+# Boxes in CHIC_LI's own reference pixels (chic-li-cutout.png, 874x1276), read
+# off a 50px grid overlaid on the cutout. Unlike Nuggy's eyes there is no
+# mouth box: the scarf covers it, so there is no mouth slot at all. The
+# earring and the shuriken are boxed the same way a face feature is, even
+# though their fill colour is the shared gold or steel family rather than a
+# feature-only colour -- see slot_layers below for why that needs its own
+# entry per slot instead of the FACE_LAYERS default.
+EYE_L = (130, 370, 390, 545)
+EYE_R = (390, 370, 650, 545)
+EARRING = (615, 375, 760, 500)
+STAR = (390, 670, 710, 970)
+
+CHICLI_FACE = {"ink", "eye_white", "eye_shadow", "iris", "pupil"}
+
+CHIC_LI = Character(
+    "chicli", "chic-li-cutout.png", "chicli.blend",
+    notes="Stealth. Redesign of Tender-Li. Traced from a hand-isolated cutout "
+          "of a full scene illustration (chic-li-1.jpeg), so no matte stage: "
+          "background removal was done once by a bespoke fence+seed matte and "
+          "the result saved as reference/chic-li-cutout.png. Reuses Nuggy's "
+          "golden breading family and eye palette per 00-style-guide.md "
+          "('stay inside the golden family'); the hood, cloak and shuriken "
+          "are new tones built at the same value tiers as Nuggy's gold ramp "
+          "so the cel-shaded look matches. Only one leg is visible in the "
+          "source art -- the other is under the cloak -- so there is a "
+          "single 'leg' slot, not leg_L/leg_R.",
+    seeds=[
+        ("ink",         "#281108"),
+        ("gold_pale",   "#F7E3A0"),
+        ("gold_light",  "#F1BA40"),
+        ("gold_base",   "#EBA126"),
+        ("gold_mid",    "#DD9127"),
+        ("gold_deep",   "#C98426"),
+        ("amber",       "#A96E25"),
+        ("shade",       "#9C5B1D"),
+        ("shade_deep",  "#834315"),
+        ("rim",         "#6A5507"),
+        ("eye_white",   "#FAF6D1"),
+        ("eye_shadow",  "#D9C199"),
+        ("iris",        "#8A5A28"),
+        ("pupil",       "#3A1E0C"),
+        ("hood_pale",   "#BD9ADB"),
+        ("hood_light",  "#9772B8"),
+        ("hood_base",   "#745094"),
+        ("hood_deep",   "#52366B"),
+        ("hood_shadow", "#311E42"),
+        ("metal_light", "#D9D2D2"),
+        ("metal_mid",   "#8C8585"),
+        ("metal_dark",  "#524B4B"),
+    ],
+    allow={
+        "eye_white":  [EYE_L, EYE_R],
+        "eye_shadow": [EYE_L, EYE_R],
+        "iris":       [EYE_L, EYE_R],
+        "pupil":      [EYE_L, EYE_R],
+        "metal_light": [STAR],
+        "metal_mid":   [STAR],
+        "metal_dark":  [STAR],
+    },
+    roi=[
+        ("eye_L", EYE_L),
+        ("eye_R", EYE_R),
+        ("earring", EARRING),
+        ("star", STAR),
+    ],
+    slot_layers={
+        "eye_L": CHICLI_FACE, "eye_R": CHICLI_FACE,
+        "earring": {"ink", "gold_pale", "gold_light", "gold_base"},
+        "star": {"ink", "metal_light", "metal_mid", "metal_dark"},
+    },
+    limb_anchors={"arm_L": (130, 830), "arm_R": (680, 820), "leg": (270, 1100)},
+    slots=["eye_L", "eye_R", "earring", "star", "arm_L", "arm_R", "leg"],
+    slot_help={
+        "eye_L": "left eye and brow (0 hide, 1 show)",
+        "eye_R": "right eye and brow (0 hide, 1 show)",
+        "earring": "gold hoop earring (0 hide, 1 show)",
+        "star": "shuriken on the chest (0 hide, 1 show)",
+        "arm_L": "left arm and fist (0 hide, 1 show)",
+        "arm_R": "right arm and fist (0 hide, 1 show)",
+        "leg": "the one visible leg and foot (0 hide, 1 show)",
+    },
+    # Body breading first, then the cloak (worn over it, so it should win any
+    # overlap at the neck wrap), then the star (sits on top of the cloak),
+    # then the face features, ink last.
+    zorder=["silhouette", "skinfill", "rim", "shade_deep", "shade", "amber",
+            "gold_deep", "gold_mid", "gold_base", "gold_light", "gold_pale",
+            "hood_shadow", "hood_deep", "hood_base", "hood_light", "hood_pale",
+            "metal_dark", "metal_mid", "metal_light",
+            "eye_shadow", "eye_white", "iris", "pupil", "ink"],
+    # cutout is 874x1276; centre is its exact midpoint, same convention as
+    # Nuggy. scale maps her full cutout height to about the same world size
+    # as Nuggy so the crew reads as one scale (00-style-guide.md has no
+    # ratio for her yet since she isn't in the original five).
+    centre=(437.0, 638.0), scale=3.5 / 1276.0, ortho=4.0,
+    ink_lum=0.08,             # the scene art is moodier/darker than Nuggy's;
+                              # nearest-colour match puts deep shadow in ink
+                              # regardless of this -- see blender-todo.md.
+    rim_band=11, open_r=63, limb_max_dist=314,   # scaled ~2.86x for the 874px cutout
+    min_area=20, min_area_ink=6, rdp_eps=3.4,
+)
+
+
+CHARACTERS = {c.name: c for c in (NUGGY, NUGGETTE, CHIC_LI)}

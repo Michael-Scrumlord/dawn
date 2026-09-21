@@ -4,7 +4,10 @@
 # Trace intermediates -- regenerate with trace/quantize.py + trace/contours.py.
 # trace.json is kept, because build.py reads it and re-tracing needs Blender.
 trace/out/*/labels.npy
+trace/out/*/meta.txt
 trace/out/*/quantized.png
+trace/out/*/render.png
+trace/out/*/render_hidden.png
 trace/out/*/verify.png
 __pycache__/
 

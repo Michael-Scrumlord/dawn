@@ -105,6 +105,28 @@ def drive_hidden(objs, ctrl, prop):
             d.expression = "on < 1"
 
 
+def clear_scene():
+    """Empty the current scene without reloading the .blend file.
+
+    `bpy.ops.wm.read_factory_settings()` looks tempting here (and is what a
+    throwaway `blender -b -P script.py` process would use) but it reloads the
+    whole file, which tears down anything an add-on registered against the
+    old one -- including, when this runs inside a live Blender instance
+    driven over MCP, the MCP server's own connection. Removing every object,
+    collection and orphaned data-block by hand reaches the same empty scene
+    without touching add-on state.
+    """
+    for ob in list(bpy.data.objects):
+        bpy.data.objects.remove(ob, do_unlink=True)
+    for coll in list(bpy.data.collections):
+        bpy.data.collections.remove(coll)
+    for block_coll in (bpy.data.curves, bpy.data.cameras, bpy.data.lights,
+                        bpy.data.meshes, bpy.data.materials, bpy.data.images):
+        for block in list(block_coll):
+            if block.users == 0:
+                block_coll.remove(block)
+
+
 # --------------------------------------------------------------------- build
 
 def setup_scene(scene, ortho, prefix):
@@ -217,7 +239,7 @@ def build(ch, prof):
     pivots = data.get("pivots", {})
     B = Builder(ch, prof)
 
-    bpy.ops.wm.read_factory_settings(use_empty=True)
+    clear_scene()
     scene = bpy.context.scene
     prefix = ch.name.upper() + "_"
     setup_scene(scene, prof.ortho or ch.ortho, prefix)
